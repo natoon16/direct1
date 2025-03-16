@@ -1,58 +1,11 @@
-import mongoose from 'mongoose';
 import { connectToDatabase } from './mongodb';
+import { PlaceCache, PlaceResult } from '../models/PlaceCache';
 
 const GOOGLE_PLACES_API_KEY = process.env.GOOGLE_PLACES_API_KEY;
 
 if (!GOOGLE_PLACES_API_KEY) {
   throw new Error('GOOGLE_PLACES_API_KEY is not defined');
 }
-
-// Define types
-interface PlaceResult {
-  id: string;
-  displayName: {
-    text: string;
-    languageCode: string;
-  };
-  formattedAddress: string;
-  websiteUri?: string;
-  rating?: number;
-  userRatingCount?: number;
-}
-
-interface CacheEntry {
-  query: string;
-  city: string;
-  category: string;
-  places: PlaceResult[];
-  timestamp: Date;
-}
-
-// Define the schema
-const PlaceCacheSchema = new mongoose.Schema<CacheEntry>({
-  query: { type: String, required: true },
-  city: { type: String, required: true },
-  category: { type: String, required: true },
-  places: [{
-    id: String,
-    displayName: {
-      text: String,
-      languageCode: String
-    },
-    formattedAddress: String,
-    websiteUri: String,
-    rating: Number,
-    userRatingCount: Number
-  }],
-  timestamp: { type: Date, default: Date.now, expires: 180 * 24 * 60 * 60 } // 180 days TTL
-});
-
-// Create indexes for faster queries
-PlaceCacheSchema.index({ query: 1, city: 1, category: 1 }, { unique: true });
-PlaceCacheSchema.index({ timestamp: 1 }, { expireAfterSeconds: 180 * 24 * 60 * 60 });
-
-// Get or create model
-const PlaceCache = mongoose.models.PlaceCache || mongoose.model<CacheEntry>('PlaceCache', PlaceCacheSchema);
 
 // Cache configuration
 const CACHE_CONFIG = {

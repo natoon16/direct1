@@ -173,7 +173,7 @@ Let’s also create a mongodb powered form, to allow users to send submissions w
 Index pages are like category pages and are a collection of towns or cities or businesses in cities.
 
 <mongo_uri>
-mongodb+srv://dbdirectory1:sWC80Q8x21BrkqGi@cluster0.dsxjw.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+mongodb+srv://dbdirectory1:<db password>.dsxjw.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
 <mongo_uri>
 
 <google_place_v1_documentation>
@@ -938,7 +938,7 @@ Open API Explorer
 <google_places_v1_documentation>
 
 <GOOGLE_API_KEY>
-AIzaSyC2bpxCiZMbUKHPjr5gJQfHUdL1uT2003g
+Key
 <GOOGLE_API_KEY>
 
 

@@ -1,32 +1,48 @@
 import mongoose from 'mongoose';
-import type { CacheEntry } from '@/types/places';
+
+// Define types
+export interface PlaceResult {
+  id: string;
+  displayName: {
+    text: string;
+    languageCode: string;
+  };
+  formattedAddress: string;
+  websiteUri?: string;
+  rating?: number;
+  userRatingCount?: number;
+}
+
+export interface CacheEntry {
+  query: string;
+  city: string;
+  category: string;
+  places: PlaceResult[];
+  timestamp: Date;
+}
 
 const placeSchema = new mongoose.Schema<CacheEntry>({
   query: { type: String, required: true },
   city: { type: String, required: true },
   category: { type: String, required: true },
-  results: [{
+  places: [{
+    id: String,
     displayName: {
-      text: { type: String, required: true },
-      languageCode: { type: String, required: true }
+      text: String,
+      languageCode: String
     },
-    formattedAddress: { type: String, required: true },
-    websiteUri: { type: String },
-    rating: { type: Number },
-    userRatingCount: { type: Number },
-    priceLevel: { type: String },
-    types: [{ type: String }],
-    photos: [{
-      name: { type: String }
-    }]
+    formattedAddress: String,
+    websiteUri: String,
+    rating: Number,
+    userRatingCount: Number
   }],
-  lastUpdated: { type: Date, required: true, default: Date.now }
+  timestamp: { type: Date, default: Date.now }
 });
 
 // Create compound index for efficient querying
-placeSchema.index({ query: 1, city: 1, category: 1 });
+placeSchema.index({ query: 1, city: 1, category: 1 }, { unique: true });
 
-// Create TTL index for automatic deletion after 6 months
-placeSchema.index({ lastUpdated: 1 }, { expireAfterSeconds: 6 * 30 * 24 * 60 * 60 });
+// Create TTL index for automatic deletion after 180 days
+placeSchema.index({ timestamp: 1 }, { expireAfterSeconds: 180 * 24 * 60 * 60 });
 
 export const PlaceCache = mongoose.models.PlaceCache || mongoose.model<CacheEntry>('PlaceCache', placeSchema); 

@@ -1,0 +1,103 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-rgb: 255, 255, 255;
+  --soft-pink: #FFE5E5;
+  --soft-peach: #FFE8D6;
+  --soft-lavender: #E8E6FF;
+  --soft-blue: #E5F0FF;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  position: relative;
+  min-height: 100vh;
+  background: linear-gradient(
+    135deg,
+    var(--soft-pink) 0%,
+    var(--soft-peach) 25%,
+    var(--soft-lavender) 75%,
+    var(--soft-blue) 100%
+  );
+  color: rgb(var(--foreground-rgb));
+  font-family: Arial, Helvetica, sans-serif;
+  background-size: 400% 400%;
+  animation: gradientFlow 15s ease infinite;
+}
+
+/* Add a subtle overlay to soften the background */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.65);
+  z-index: 0;
+}
+
+/* Ensure content appears above the overlay */
+#__next, main {
+  position: relative;
+  z-index: 1;
+}
+
+/* Update container backgrounds to be more transparent */
+.bg-white {
+  background-color: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(8px);
+}
+
+.bg-gray-50 {
+  background-color: rgba(249, 250, 251, 0.85) !important;
+  backdrop-filter: blur(8px);
+}
+
+/* Add a semi-transparent white overlay to improve content readability */
+.content-wrapper {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 1rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  margin: 2rem auto;
+  max-width: 1280px;
+  padding: 2rem;
+}
+
+/* Gradient text effect for headings */
+.gradient-text {
+  background: linear-gradient(135deg, #FF69B4, #4169E1);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  display: inline-block;
+}
+
+/* Add subtle animation to gradient background */
+@keyframes gradientFlow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}

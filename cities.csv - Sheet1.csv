@@ -1,0 +1,102 @@
+Population Rank,Place name,Label[10],County,"Population
+(2020)[17]",Zip Codes
+1,Jacksonville,City,Duval,949611,32099-32234
+2,Miami,City,Miami-Dade,442241,33101-33299 
+3,Tampa,City,Hillsborough,384959,33559-33694 
+4,Orlando,City,Orange,307573,32789-32899 
+5,St. Petersburg,City,Pinellas,258308,33701-33784 
+6,Hialeah,City,Miami-Dade,223109,33002-33167 
+7,Port St. Lucie,City,St. Lucie,204851,34945-34990 
+8,Tallahassee,City,Leon,196169,32301-32399
+9,Cape Coral,City,Lee,194016,33903-33993 
+10,Fort Lauderdale,City,Broward,182760,33301-33394 
+11,Pembroke Pines,City,Broward,171178,33023-33332 
+12,Hollywood,City,Broward,153067,33004-33316 
+13,Gainesville,City,Alachua,141085,32601-32667
+14,Miramar,City,Broward,134721,32023-33029
+15,Coral Springs,City,Broward,134394,33065-33076 
+16,Palm Bay,City,Brevard,119760,32901-32976 
+17,West Palm Beach,City,Palm Beach,117415,33401-33422
+18,Clearwater,City,Pinellas,117292,33755-34698
+19,Lakeland,City,Polk,112641,33801-33815
+20,Pompano Beach,City,Broward,112046,33060-33097
+21,Miami Gardens,City,Miami-Dade,111640,33014-33179
+22,Davie,City,Broward,105691,33312-33355
+23,Boca Raton,City,Palm Beach,97422,33427-33499
+24,Sunrise,City,Broward,97335,33313-33351
+25,Deltona,City,Volusia,93692,32725-32739
+26,Plantation,City,Broward,91750,33311-33388
+27,Palm Coast,City,Flagler,89258,32135-32164
+28,Deerfield Beach,City,Broward,86859,33064-33443
+29,Fort Myers†,City,Lee,86395,33901-33994
+30,Melbourne,City,Brevard,84678,32901-32951
+31,Miami Beach,City,Miami-Dade,82890,33109-33239
+32,Largo,City,Pinellas,82485,33770-33779
+33,Homestead,City,Miami-Dade,80737,33030–33092
+34,Boynton Beach,City,Palm Beach,80380,33424–32474
+35,Kissimmee,City,Osceola,79226,34741–34759
+36,Doral,City,Miami-Dade,75874,33122–33222
+37,North Port,City,Sarasota,74793,34286–34291
+38,Lauderhill,City,Broward,74482,33311–33351
+39,Daytona Beach,City,Volusia,72647,32114–32198
+40,Tamarac,City,Broward,71897,33309–33359
+41,Weston,City,Broward,68107,33326–33332
+42,Delray Beach,City,Palm Beach,66846,33444-33484
+43,Ocala,City,Marion,63591,34470-34483
+44,Port Orange,City,Volusia,62596,32123-32129
+45,Wellington,City,Palm Beach,61637,33411-33470
+46,Sanford,City,Seminole,61051,32746-32773
+47,Jupiter,City,Palm Beach,61047,33458-33478
+48,North Miami,City,Miami-Dade,60191,33160-33181
+49,Palm Beach Gardens,City,Palm Beach,59182,33403-33420
+50,St. Cloud,City,Osceola,58964,34744-34772
+51,Margate,City,Broward,58712,33063-33093
+52,Coconut Creek,City,Broward,57833,33063-33097
+53,Bradenton,City,Manatee,55698,34201-34282
+54,Apopka,City,Orange,54873,32703-32776
+55,Sarasota,City,Sarasota,54842,34230-34277
+56,Pensacola,City,Escambia,54312,32501-32591
+57,Bonita Springs,City,Lee,53644,33928-34136
+58,Pinellas Park,City,Pinellas,53093,33702-33782
+59,Coral Gables,City,Miami-Dade,49248,33114-33158
+60,Winter Haven,City,Polk,49219,33880-33888
+61,Titusville,City,Brevard,48789,32780-32796
+62,Fort Pierce,City,St. Lucie,47297,32703-34787
+63,Ocoee,City,Orange,47295,32703-34787
+64,Winter Garden,City,Orange,46964,34761-34787
+65,Altamonte Springs,City,Seminole,46231,32701-32779
+66,Cutler Bay,City,Miami-Dade,45425,33157-33190
+67,North Lauderdale,City,Broward,44794,33068-33319
+68,Oakland Park,City,Broward,44229,33304-33334
+69,Greenacres,City,Palm Beach,43990,33413-33467
+70,North Miami Beach,City,Miami-Dade,43676,33160-33181
+71,Ormond Beach,City,Volusia,43475,32173-32176
+72,Clermont,City,Lake,43021,34711-34715
+73,Lake Worth Beach,City,Palm Beach,42219,33460-33480
+74,Hallandale Beach,City,Broward,41217,33008-33009
+75,Aventura,City,Miami-Dade,40242,33160-33180
+76,Oviedo,City,Seminole,40059,32708-32766
+77,Plant City,City,Hillsborough,39764,33563-33567
+78,Royal Palm Beach,City,Palm Beach,38932,33411-33421
+79,Winter Springs,City,Seminole,38342,32708-32765
+80,Riviera Beach,City,Palm Beach,37604,33403-33419
+81,DeLand,City,Volusia,37351,32720-32724
+82,Estero,City,Lee,36939,33928-34135
+83,Dunedin,City,Pinellas,36068,33763-34698
+84,Lauderdale Lakes,City,Broward,35954,33309-33319
+85,Parkland,City,Broward,34670,33067-33076
+86,Cooper City,City,Broward,34401,33024-33330
+87,Panama City,City,Bay,32939,32401-32461
+88,Dania Beach,City,Broward,31723,33004-33316
+89,Miami Lakes,City,Miami-Dade,30467,33014-33018
+90,New Smyrna Beach,City,Volusia,30142,32168-32170
+91,Winter Park,City,Orange,29795,32789-32793
+92,Casselberry,City,Seminole,28794,32707-32730
+93,Rockledge,City,Brevard,27678,32922-32956
+94,Crestview,City,Okaloosa,27134,32536-32539
+95,Leesburg,City,Lake,27000,34731-34797
+96,Palm Springs,City,Palm Beach,26890,33406-33461
+97,Temple Terrace,City,Hillsborough,26690,33617-33637
+98,Haines City,City,Polk,26669,33837-33845
+99,Key West,City,Monroe,26444,33040-33045
+100,West Melbourne,City,Brevard,25924,32788-32789

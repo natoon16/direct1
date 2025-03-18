@@ -1,15 +1,16 @@
 import { NextResponse } from 'next/server'
 
 export async function GET() {
-  const robotsTxt = `User-agent: *
+  const robotsTxt = `# Allow all search engines
+User-agent: *
+Allow: /
+
+# Explicitly allow Bingbot
+User-agent: bingbot
 Allow: /
 
 # Sitemap
 Sitemap: https://weddingdirectoryflorida.com/sitemap.xml
-
-# Disallow admin and API routes
-Disallow: /api/
-Disallow: /admin/
 `
 
   return new NextResponse(robotsTxt, {

@@ -19,7 +19,7 @@ export default function Header() {
             type="button"
             className="sm:hidden inline-flex items-center justify-center p-2 rounded-md text-gray-600 hover:text-rose-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-rose-500"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            aria-expanded="false"
+            aria-expanded={isMenuOpen}
           >
             <span className="sr-only">Open main menu</span>
             {/* Hamburger icon */}

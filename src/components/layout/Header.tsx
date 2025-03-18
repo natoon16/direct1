@@ -1,3 +1,5 @@
+'use client';
+
 import Link from 'next/link';
 import { useState } from 'react';
 
@@ -20,6 +22,7 @@ export default function Header() {
             className="sm:hidden inline-flex items-center justify-center p-2 rounded-md text-gray-600 hover:text-rose-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-rose-500"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             aria-expanded={isMenuOpen}
+            aria-controls="mobile-menu"
           >
             <span className="sr-only">Open main menu</span>
             {/* Hamburger icon */}
@@ -74,7 +77,7 @@ export default function Header() {
         </div>
 
         {/* Mobile menu */}
-        <div className={`${isMenuOpen ? 'block' : 'hidden'} sm:hidden`}>
+        <div id="mobile-menu" className={`${isMenuOpen ? 'block' : 'hidden'} sm:hidden`}>
           <div className="pt-2 pb-3 space-y-1">
             <Link
               href="/cities"

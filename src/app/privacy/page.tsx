@@ -87,7 +87,7 @@ export default function PrivacyPolicyPage() {
           <p className="text-gray-700 mb-6">
             If you have any questions about this Privacy Policy, please contact us at{' '}
             <a 
-              href="mailto:welcome@weddingdirectoryflorida.com" 
+              href="mailto:partnershipshub@proton.me" 
               className="text-rose-600 hover:text-rose-700 transition-colors"
             >
               welcome@weddingdirectoryflorida.com

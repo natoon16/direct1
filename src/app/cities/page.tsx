@@ -1,4 +1,4 @@
-import { getAllCities } from '@/lib/cities'
+import { getAllCities, cityNameToSlug } from '@/lib/cities'
 import { Metadata } from 'next'
 import Link from 'next/link'
 
@@ -28,7 +28,7 @@ export default async function CitiesPage() {
           {sortedCities.map((city) => (
             <Link
               key={city._id}
-              href={`/city/${city.slug}`}
+              href={`/city/${city.slug || cityNameToSlug(city.name)}`}
               className="p-4 border border-gray-200 rounded-lg hover:border-rose-500 transition-colors"
             >
               <h2 className="text-lg font-medium text-gray-900">

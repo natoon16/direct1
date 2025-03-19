@@ -3,7 +3,7 @@ import { City } from '@/types/City'
 import { WithId, Document } from 'mongodb'
 
 // Helper function to convert city name to URL-friendly format
-export function cityNameToSlug(name: string): string {
+function cityNameToSlug(name: string): string {
   return name.toLowerCase().replace(/\s+/g, '-')
 }
 
@@ -26,9 +26,7 @@ export async function getAllCities(): Promise<City[]> {
     _id: city._id.toString(),
     name: city.name as string,
     state: city.state as string,
-    latitude: city.latitude as number,
-    longitude: city.longitude as number,
-    slug: cityNameToSlug(city.name as string)
+    zipCodeRange: city.zipCodeRange as string
   }))
 }
 
@@ -39,8 +37,10 @@ export async function getCityBySlug(slug: string): Promise<City | null> {
     throw new Error('Database connection failed')
   }
 
-  // Convert slug back to city name format
-  const cityName = slugToCityName(slug)
+  // Convert slug to city name format
+  const cityName = slug.split('-').map(word => 
+    word.charAt(0).toUpperCase() + word.slice(1)
+  ).join(' ')
   
   const city = await db.collection('cities').findOne({ 
     name: { $regex: new RegExp(`^${cityName}$`, 'i') }
@@ -54,8 +54,6 @@ export async function getCityBySlug(slug: string): Promise<City | null> {
     _id: city._id.toString(),
     name: city.name as string,
     state: city.state as string,
-    latitude: city.latitude as number,
-    longitude: city.longitude as number,
-    slug: cityNameToSlug(city.name as string)
+    zipCodeRange: city.zipCodeRange as string
   }
 } 

@@ -4,20 +4,14 @@ import type { NextRequest } from 'next/server'
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // Check if this is a city route
+  // Handle city URLs
   if (pathname.startsWith('/city/')) {
-    const cityPath = pathname.slice(6) // Remove '/city/' prefix
+    const cityPath = pathname.slice(6) // Remove '/city/'
+    const decodedCity = decodeURIComponent(cityPath)
     
-    // First decode any encoded characters
-    const decodedPath = decodeURIComponent(cityPath)
-    
-    // Convert spaces to dashes
-    const dashedPath = decodedPath.replace(/\s+/g, '-').toLowerCase()
-    
-    // Only redirect if the path needs normalization
-    if (cityPath !== dashedPath) {
-      const normalizedPath = `/city/${dashedPath}`
-      return NextResponse.redirect(new URL(normalizedPath, request.url), 301)
+    // If the URL contains encoded spaces or special characters, redirect to the decoded version
+    if (cityPath !== decodedCity) {
+      return NextResponse.redirect(new URL(`/city/${decodedCity}`, request.url))
     }
   }
 

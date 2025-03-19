@@ -2,6 +2,11 @@ import { getAllCities } from '@/lib/cities'
 import { Metadata } from 'next'
 import Link from 'next/link'
 
+// Helper function to convert city name to URL-friendly format
+function cityNameToSlug(name: string): string {
+  return name.toLowerCase().replace(/\s+/g, '-')
+}
+
 export const metadata: Metadata = {
   title: 'Florida Wedding Vendors by City - Florida Wedding Directory',
   description: 'Find wedding vendors in cities across Florida. Browse photographers, venues, planners, florists, and more in your area.',
@@ -28,7 +33,7 @@ export default async function CitiesPage() {
           {sortedCities.map((city) => (
             <Link
               key={city._id}
-              href={`/city/${city.slug}`}
+              href={`/city/${cityNameToSlug(city.name)}`}
               className="p-4 border border-gray-200 rounded-lg hover:border-rose-500 transition-colors"
             >
               <h2 className="text-lg font-medium text-gray-900">

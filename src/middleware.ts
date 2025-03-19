@@ -8,16 +8,14 @@ export function middleware(request: NextRequest) {
   if (pathname.startsWith('/city/')) {
     const cityPath = pathname.slice(6) // Remove '/city/' prefix
     
-    // If the URL contains spaces, encode them
-    if (cityPath.includes(' ')) {
-      const encodedPath = `/city/${encodeURIComponent(cityPath)}`
-      return NextResponse.redirect(new URL(encodedPath, request.url))
-    }
+    // Normalize to the encoded version (with %20)
+    const normalizedPath = encodeURIComponent(decodeURIComponent(cityPath))
+    const currentPath = cityPath.replace(/ /g, '%20')
     
-    // If the URL contains %20, decode it
-    if (cityPath.includes('%20')) {
-      const decodedPath = `/city/${decodeURIComponent(cityPath)}`
-      return NextResponse.redirect(new URL(decodedPath, request.url))
+    // Only redirect if the current path is different from the normalized path
+    if (currentPath !== normalizedPath) {
+      const encodedPath = `/city/${normalizedPath}`
+      return NextResponse.redirect(new URL(encodedPath, request.url), 301)
     }
   }
 

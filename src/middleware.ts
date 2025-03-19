@@ -8,14 +8,16 @@ export function middleware(request: NextRequest) {
   if (pathname.startsWith('/city/')) {
     const cityPath = pathname.slice(6) // Remove '/city/' prefix
     
-    // Normalize to the encoded version (with %20)
-    const normalizedPath = encodeURIComponent(decodeURIComponent(cityPath))
-    const currentPath = cityPath.replace(/ /g, '%20')
+    // First decode any encoded characters
+    const decodedPath = decodeURIComponent(cityPath)
     
-    // Only redirect if the current path is different from the normalized path
-    if (currentPath !== normalizedPath) {
-      const encodedPath = `/city/${normalizedPath}`
-      return NextResponse.redirect(new URL(encodedPath, request.url), 301)
+    // Convert spaces to dashes
+    const dashedPath = decodedPath.replace(/\s+/g, '-').toLowerCase()
+    
+    // Only redirect if the path needs normalization
+    if (cityPath !== dashedPath) {
+      const normalizedPath = `/city/${dashedPath}`
+      return NextResponse.redirect(new URL(normalizedPath, request.url), 301)
     }
   }
 

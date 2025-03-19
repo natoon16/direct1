@@ -9,9 +9,8 @@ Allow: /
 User-agent: bingbot
 Allow: /
 
-# Sitemap
-Sitemap: https://weddingdirectoryflorida.com/sitemap.xml
-`
+# Sitemap location
+Sitemap: https://weddingdirectoryflorida.com/sitemap.xml`
 
   return new NextResponse(robotsTxt, {
     headers: {

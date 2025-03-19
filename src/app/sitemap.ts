@@ -1,69 +1,96 @@
 import { MetadataRoute } from 'next';
-import { categories } from '@/data/keywords';
-import { cities } from '@/data/cities';
+import { connectToDatabase } from '@/lib/mongodb';
+import { getAllCities } from '@/lib/cities';
+import { getAllCategories } from '@/lib/categories';
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://weddingdirectoryflorida.com';
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  try {
+    // Connect to the database
+    const { db } = await connectToDatabase();
+    
+    if (!db) {
+      throw new Error('Database connection failed');
+    }
 
-  // Static pages
-  const staticPages = [
-    {
-      url: baseUrl,
+    // Get all cities and categories
+    const cities = await getAllCities();
+    const categories = await getAllCategories();
+
+    // Base URLs
+    const baseUrls = [
+      {
+        url: 'https://weddingdirectoryflorida.com',
+        lastModified: new Date(),
+        changeFrequency: 'daily' as const,
+        priority: 1,
+      },
+      {
+        url: 'https://weddingdirectoryflorida.com/about',
+        lastModified: new Date(),
+        changeFrequency: 'monthly' as const,
+        priority: 0.8,
+      },
+      {
+        url: 'https://weddingdirectoryflorida.com/contact',
+        lastModified: new Date(),
+        changeFrequency: 'monthly' as const,
+        priority: 0.8,
+      },
+      {
+        url: 'https://weddingdirectoryflorida.com/categories',
+        lastModified: new Date(),
+        changeFrequency: 'daily' as const,
+        priority: 0.9,
+      },
+    ];
+
+    // City URLs
+    const cityUrls = cities.map((city) => ({
+      url: `https://weddingdirectoryflorida.com/city/${encodeURIComponent(city.name.toLowerCase())}`,
       lastModified: new Date(),
       changeFrequency: 'daily' as const,
-      priority: 1,
-    },
-    {
-      url: `${baseUrl}/search`,
+      priority: 0.7,
+    }));
+
+    // Category URLs
+    const categoryUrls = categories.map((category) => ({
+      url: `https://weddingdirectoryflorida.com/category/${encodeURIComponent(category.slug)}`,
       lastModified: new Date(),
       changeFrequency: 'daily' as const,
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/privacy`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly' as const,
-      priority: 0.3,
-    },
-    {
-      url: `${baseUrl}/terms`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly' as const,
-      priority: 0.3,
-    },
-    {
-      url: `${baseUrl}/about`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly' as const,
-      priority: 0.3,
-    },
-  ];
+      priority: 0.7,
+    }));
 
-  // Category pages
-  const categoryRoutes = categories.map((category) => ({
-    url: `${baseUrl}/category/${category.slug}`,
-    lastModified: new Date(),
-    changeFrequency: 'daily' as const,
-    priority: 0.8,
-  }));
-
-  // City pages
-  const cityRoutes = cities.map((city) => ({
-    url: `${baseUrl}/city/${city.name.toLowerCase()}`,
-    lastModified: new Date(),
-    changeFrequency: 'daily' as const,
-    priority: 0.8,
-  }));
-
-  // Category + City combination pages
-  const combinationRoutes = categories.flatMap((category) =>
-    cities.map((city) => ({
-      url: `${baseUrl}/category/${category.slug}/${city.name.toLowerCase()}`,
-      lastModified: new Date(),
-      changeFrequency: 'daily' as const,
-      priority: 0.9,
-    }))
-  );
-
-  return [...staticPages, ...categoryRoutes, ...cityRoutes, ...combinationRoutes];
+    // Combine all URLs
+    return [...baseUrls, ...cityUrls, ...categoryUrls];
+  } catch (error) {
+    console.error('Error generating sitemap:', error);
+    
+    // Return at least the static URLs if there's an error
+    return [
+      {
+        url: 'https://weddingdirectoryflorida.com',
+        lastModified: new Date(),
+        changeFrequency: 'daily' as const,
+        priority: 1,
+      },
+      {
+        url: 'https://weddingdirectoryflorida.com/about',
+        lastModified: new Date(),
+        changeFrequency: 'monthly' as const,
+        priority: 0.8,
+      },
+      {
+        url: 'https://weddingdirectoryflorida.com/contact',
+        lastModified: new Date(),
+        changeFrequency: 'monthly' as const,
+        priority: 0.8,
+      },
+      {
+        url: 'https://weddingdirectoryflorida.com/categories',
+        lastModified: new Date(),
+        changeFrequency: 'daily' as const,
+        priority: 0.9,
+      },
+    ];
+  }
 } 

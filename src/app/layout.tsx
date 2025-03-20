@@ -8,10 +8,19 @@ const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: {
-    default: 'Florida Wedding Directory',
-    template: '%s | Florida Wedding Directory',
+    default: 'Wedding Directory Florida - Find Local Wedding Vendors',
+    template: '%s - Wedding Directory Florida'
   },
-  description: 'Find the perfect wedding vendors in Florida. Browse venues, photographers, caterers, and more.',
+  description: 'Find the best wedding vendors in Florida. Browse photographers, venues, caterers, and more for your perfect wedding day.',
+  icons: {
+    icon: [
+      { url: '/favicon.ico', sizes: '32x32' },
+      { url: '/favicon.svg', type: 'image/svg+xml' }
+    ],
+    apple: [
+      { url: '/apple-touch-icon.png', sizes: '180x180' }
+    ]
+  }
 };
 
 export default function RootLayout({

@@ -1,4 +1,4 @@
-import { connectToDatabase, getConnectionStatus } from '../../../lib/mongodb';
+import { connectToDatabase, getConnectionStatus } from '../../lib/mongodb';
 import { NextResponse } from 'next/server';
 import mongoose from 'mongoose';
 

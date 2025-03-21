@@ -1,11 +1,13 @@
 import './globals.css';
 import { Inter } from 'next/font/google';
+import Header from './components/Header';
+import Footer from './components/Footer';
 
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata = {
-  title: 'Wedding Directory Florida - Find Wedding Vendors in Florida',
-  description: 'Find the best wedding vendors in Florida. Browse photographers, venues, DJs, florists, and more for your special day.',
+  title: 'Wedding Directory Florida - Find Local Wedding Vendors',
+  description: 'Discover and connect with the best wedding vendors in Florida. Find photographers, venues, caterers, and more for your special day.',
 };
 
 export default function RootLayout({
@@ -16,9 +18,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <main className="min-h-screen bg-white">
+        <div className="min-h-screen flex flex-col">
+          <Header />
           {children}
-        </main>
+          <Footer />
+        </div>
       </body>
     </html>
   );

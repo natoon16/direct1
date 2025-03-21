@@ -23,49 +23,38 @@ export default function VendorCard({ vendor }: VendorCardProps) {
           <span className="text-gray-400">No image available</span>
         </div>
       )}
-
-      <div className="flex flex-1 flex-col justify-between p-6">
-        <div className="flex-1">
-          <h3 className="text-xl font-semibold text-gray-900">
-            {vendor.name}
-          </h3>
-          
+      <div className="flex flex-col flex-1 p-4">
+        <h3 className="text-xl font-semibold text-gray-900">{vendor.name}</h3>
+        <p className="mt-1 text-sm text-gray-500">{vendor.address}</p>
+        {vendor.rating && (
           <div className="mt-2 flex items-center">
-            {vendor.rating && (
-              <>
-                <StarIcon className="h-5 w-5 text-yellow-400" />
-                <span className="ml-1 text-sm text-gray-600">
-                  {vendor.rating.toFixed(1)}
-                </span>
-              </>
-            )}
+            <div className="flex items-center">
+              {[0, 1, 2, 3, 4].map((rating) => (
+                <StarIcon
+                  key={rating}
+                  className={`${
+                    vendor.rating && rating < Math.floor(vendor.rating)
+                      ? 'text-yellow-400'
+                      : 'text-gray-300'
+                  } h-5 w-5 flex-shrink-0`}
+                />
+              ))}
+            </div>
+            <p className="ml-2 text-sm text-gray-500">
+              {vendor.reviews ? `(${vendor.reviews} reviews)` : ''}
+            </p>
           </div>
-
-          <p className="mt-3 text-sm text-gray-500">
-            {vendor.address}
-          </p>
-        </div>
-
-        <div className="mt-6 flex items-center gap-4">
-          {vendor.website && (
-            <a
-              href={vendor.website}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm font-medium text-blue-600 hover:text-blue-500"
-            >
-              Visit Website
-            </a>
-          )}
-          {vendor.phone && (
-            <a
-              href={`tel:${vendor.phone}`}
-              className="text-sm font-medium text-blue-600 hover:text-blue-500"
-            >
-              {vendor.phone}
-            </a>
-          )}
-        </div>
+        )}
+        {vendor.website && (
+          <a
+            href={vendor.website}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-4 text-sm text-blue-600 hover:text-blue-800"
+          >
+            Visit Website
+          </a>
+        )}
       </div>
     </div>
   );

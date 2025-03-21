@@ -1,19 +1,47 @@
 import { connectToDatabase } from './mongodb'
-import { Category } from '@/types/Category'
-import { WithId, Document } from 'mongodb'
+import mongoose from 'mongoose'
+
+export interface Category {
+  name: string
+  slug: string
+  count?: number
+}
 
 export async function getAllCategories(): Promise<Category[]> {
-  const { db } = await connectToDatabase()
-  
-  if (!db) {
-    throw new Error('Database connection failed')
-  }
+  try {
+    await connectToDatabase()
+    
+    const connection = mongoose.connection
+    if (!connection.readyState) {
+      throw new Error('Database connection not established')
+    }
 
-  const categories = await db.collection('categories').find({}).toArray()
-  return categories.map(category => ({
-    _id: category._id.toString(),
-    name: category.name as string,
-    slug: category.slug as string,
-    description: category.description as string
-  }))
+    const db = connection.db
+    if (!db) {
+      throw new Error('Database not initialized')
+    }
+
+    // Using mongoose aggregate to get categories
+    const categories = await db.collection('places-cache')
+      .aggregate([
+        { $group: { 
+          _id: "$category",
+          count: { $sum: 1 }
+        }},
+        { $project: {
+          _id: 0,
+          name: "$_id",
+          slug: { $toLower: "$_id" },
+          count: 1
+        }}
+      ]).toArray() as Category[]
+
+    return categories
+      .filter((category: Category) => category.name) // Filter out any null categories
+      .sort((a: Category, b: Category) => a.name.localeCompare(b.name))
+
+  } catch (error) {
+    console.error('Error fetching categories:', error)
+    return []
+  }
 } 

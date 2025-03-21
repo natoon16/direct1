@@ -200,4 +200,20 @@ export async function searchPlaces(query: string, city: string, category: string
     console.error('Error in searchPlaces:', error);
     throw error;
   }
+}
+
+export interface Place {
+  id: string;
+  name: string;
+  address: string;
+  description?: string;
+  image?: string;
+  photos?: string[];
+  phone?: string;
+  website?: string;
+  rating?: number;
+  reviews?: number;
+  category?: string;
+  latitude?: number;
+  longitude?: number;
 } 

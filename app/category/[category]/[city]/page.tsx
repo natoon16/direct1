@@ -1,9 +1,9 @@
-import { cities } from '@/data/cities';
-import { categories } from '@/data/keywords';
-import { searchPlaces } from '@/lib/places';
+import { cities, City } from '../../../../data/cities';
+import { categories, Category } from '../../../../data/keywords';
+import { searchPlaces } from '../../../../lib/places';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
-import VendorCard from '@/components/VendorCard';
+import VendorCard from '../../../../components/VendorCard';
 
 interface Props {
   params: {
@@ -14,11 +14,11 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   // Validate category and city
-  const category = categories.find(c => c.slug === params.category);
+  const category = categories.find((c: Category) => c.slug === params.category);
   const cityName = params.city.split('-').map(word => 
     word.charAt(0).toUpperCase() + word.slice(1)
   ).join(' ');
-  const city = cities.find(c => c.name.toLowerCase() === cityName.toLowerCase());
+  const city = cities.find((c: City) => c.name.toLowerCase() === cityName.toLowerCase());
 
   if (!category || !city) {
     return {
@@ -35,11 +35,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function CategoryPage({ params }: Props) {
   // Validate category and city
-  const category = categories.find(c => c.slug === params.category);
+  const category = categories.find((c: Category) => c.slug === params.category);
   const cityName = params.city.split('-').map(word => 
     word.charAt(0).toUpperCase() + word.slice(1)
   ).join(' ');
-  const city = cities.find(c => c.name.toLowerCase() === cityName.toLowerCase());
+  const city = cities.find((c: City) => c.name.toLowerCase() === cityName.toLowerCase());
 
   // If category or city not found in our lists, redirect to search-not-found
   if (!category || !city) {

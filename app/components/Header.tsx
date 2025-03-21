@@ -36,14 +36,6 @@ export default function Header() {
               Contact
             </Link>
           </div>
-          <div className="ml-10 space-x-4">
-            <Link
-              href="/vendors/register"
-              className="inline-block rounded-md border border-purple-600 px-4 py-2 text-base font-medium text-purple-600 hover:bg-purple-50"
-            >
-              List Your Business
-            </Link>
-          </div>
         </div>
         <div className="flex flex-wrap justify-center space-x-6 py-4 lg:hidden">
           <Link

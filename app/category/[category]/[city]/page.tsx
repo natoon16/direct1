@@ -1,9 +1,9 @@
-import { cities, City } from '../../../../data/cities';
-import { categories, Category } from '../../../../data/keywords';
-import { searchPlaces } from '../../../../lib/places';
+import { cities, City } from '../../../data/cities';
+import { categories, Category } from '../../../data/keywords';
+import { searchPlaces } from '../../../lib/places';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
-import VendorCard from '../../../../components/VendorCard';
+import VendorCard from '../../../components/VendorCard';
 
 interface Props {
   params: {

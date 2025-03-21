@@ -13,9 +13,11 @@ export default function SearchBox() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (selectedCity && selectedCategory) {
-      const categorySlug = categories.find(c => c.name === selectedCategory)?.slug;
-      const citySlug = selectedCity.toLowerCase();
-      router.push(`/category/${categorySlug}/${citySlug}`);
+      const category = categories.find(c => c.name === selectedCategory);
+      const citySlug = selectedCity.toLowerCase().replace(/\s+/g, '-');
+      if (category) {
+        router.push(`/category/${category.slug}/${citySlug}`);
+      }
     }
   };
 

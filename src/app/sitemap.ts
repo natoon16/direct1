@@ -37,21 +37,27 @@ export default function sitemap(): MetadataRoute.Sitemap {
   ];
 
   // City pages
-  const cityRoutes = cities.map((city) => ({
-    url: `${baseUrl}/city/${city.name.toLowerCase().replace(/\s+/g, '-')}`,
-    lastModified: new Date(),
-    changeFrequency: 'weekly' as const,
-    priority: 0.8,
-  }));
+  const cityRoutes = cities.map((city) => {
+    const citySlug = city.name.toLowerCase().replace(/\s+/g, '-');
+    return {
+      url: `${baseUrl}/city/${citySlug}`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: 0.8,
+    };
+  });
 
   // Category pages for each city
   const categoryRoutes = cities.flatMap((city) =>
-    categories.map((category) => ({
-      url: `${baseUrl}/category/${category.slug}/${city.name.toLowerCase().replace(/\s+/g, '-')}`,
-      lastModified: new Date(),
-      changeFrequency: 'daily' as const,
-      priority: 0.7,
-    }))
+    categories.map((category) => {
+      const citySlug = city.name.toLowerCase().replace(/\s+/g, '-');
+      return {
+        url: `${baseUrl}/category/${category.slug}/${citySlug}`,
+        lastModified: new Date(),
+        changeFrequency: 'daily' as const,
+        priority: 0.7,
+      };
+    })
   );
 
   return [...staticRoutes, ...cityRoutes, ...categoryRoutes];

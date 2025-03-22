@@ -13,7 +13,10 @@ const options: MongoClientOptions = {
   retryWrites: true,
   retryReads: true,
   maxPoolSize: 10,
-  minPoolSize: 5
+  minPoolSize: 5,
+  directConnection: false,
+  replicaSet: 'atlas-ltq4a2-shard-0',
+  ssl: true
 };
 
 let client: MongoClient;
@@ -76,35 +79,41 @@ const SIX_MONTHS = 15778800000;
 export const getVendors = cache(async (city: string, category?: string) => {
   try {
     console.log('Getting vendors for:', { city, category });
-    const client = await Promise.race([
-      clientPromise,
-      new Promise<MongoClient>((_, reject) => 
-        setTimeout(() => reject(new Error('MongoDB connection timeout')), 5000)
-      )
-    ]);
+    let vendors: Vendor[] = [];
 
-    const db = client.db("weddingDirectory");
-    const collection = db.collection<Vendor>("vendors");
+    try {
+      const client = await Promise.race([
+        clientPromise,
+        new Promise<MongoClient>((_, reject) => 
+          setTimeout(() => reject(new Error('MongoDB connection timeout')), 5000)
+        )
+      ]);
 
-    const query: Document = {
-      city: city.toLowerCase(),
-      lastUpdated: { $gt: new Date(Date.now() - SIX_MONTHS) }
-    };
-    
-    if (category) {
-      query.category = category.toLowerCase();
+      const db = client.db("weddingDirectory");
+      const collection = db.collection<Vendor>("vendors");
+
+      const query: Document = {
+        city: city.toLowerCase(),
+        lastUpdated: { $gt: new Date(Date.now() - SIX_MONTHS) }
+      };
+      
+      if (category) {
+        query.category = category.toLowerCase();
+      }
+
+      console.log('MongoDB query:', query);
+      
+      const findPromise: Promise<Vendor[]> = collection.find(query).toArray();
+      const timeoutPromise = new Promise<Vendor[]>((_, reject) => 
+        setTimeout(() => reject(new Error('MongoDB query timeout')), 5000)
+      );
+      
+      vendors = await Promise.race([findPromise, timeoutPromise]);
+      console.log('Found vendors in MongoDB:', vendors.length);
+    } catch (mongoError) {
+      console.error('MongoDB error:', mongoError);
+      // Continue to Google Places API if MongoDB fails
     }
-
-    console.log('MongoDB query:', query);
-    
-    // Add timeout to the find operation
-    const findPromise: Promise<Vendor[]> = collection.find(query).toArray();
-    const timeoutPromise = new Promise<Vendor[]>((_, reject) => 
-      setTimeout(() => reject(new Error('MongoDB query timeout')), 5000)
-    );
-    
-    const vendors = await Promise.race([findPromise, timeoutPromise]);
-    console.log('Found vendors in MongoDB:', vendors.length);
 
     if (vendors.length === 0) {
       console.log('No vendors found in cache, fetching from Google Places...');
@@ -112,42 +121,26 @@ export const getVendors = cache(async (city: string, category?: string) => {
       console.log('Fetched vendors from Google Places:', newVendors.length);
       
       if (newVendors.length > 0) {
-        const vendorsToInsert: Vendor[] = newVendors.map((vendor: Partial<Vendor>) => ({
-          ...vendor,
-          lastUpdated: new Date(),
-          city: city.toLowerCase(),
-          category: category?.toLowerCase(),
-          name: vendor.name || '',
-          address: vendor.address || ''
-        }));
-        
         try {
-          console.log('Inserting new vendors into MongoDB:', vendorsToInsert.length);
-          const insertPromise = collection.insertMany(vendorsToInsert);
-          const insertTimeoutPromise = new Promise<any>((_, reject) => 
-            setTimeout(() => reject(new Error('MongoDB insert timeout')), 5000)
-          );
-          
-          await Promise.race([insertPromise, insertTimeoutPromise]);
-          return vendorsToInsert;
+          const client = await clientPromise;
+          const db = client.db("weddingDirectory");
+          const collection = db.collection<Vendor>("vendors");
+
+          console.log('Inserting new vendors into MongoDB:', newVendors.length);
+          await collection.insertMany(newVendors).catch(err => {
+            console.error('Error inserting vendors:', err);
+          });
         } catch (insertError) {
-          console.error('Error inserting vendors:', insertError);
-          return newVendors; // Return the vendors even if we couldn't cache them
+          console.error('Error accessing MongoDB for insert:', insertError);
         }
+        return newVendors;
       }
     }
 
     return vendors;
   } catch (error) {
     console.error('Error in getVendors:', error);
-    // If MongoDB fails, try to get vendors directly from Google Places
-    try {
-      console.log('MongoDB failed, falling back to Google Places...');
-      return await fetchFromGooglePlaces(city, category);
-    } catch (fallbackError) {
-      console.error('Fallback to Google Places failed:', fallbackError);
-      return [];
-    }
+    return [];
   }
 });
 
@@ -157,84 +150,92 @@ async function fetchFromGooglePlaces(city: string, category?: string): Promise<V
   }
 
   try {
-    const searchQuery = category 
-      ? `wedding ${category} in ${city}, Florida`
-      : `wedding venues in ${city}, Florida`;
-    console.log('Google Places search query:', searchQuery);
-    
-    const url = 'https://places.googleapis.com/v1/places:searchText';
-    console.log('Using new Google Places API endpoint');
+    // Construct search queries based on category
+    const queries = [];
+    if (category) {
+      // More specific queries for better results
+      queries.push(
+        `${category} wedding vendors near ${city}, Florida`,
+        `best ${category} wedding services ${city}, FL`,
+        `top rated wedding ${category} in ${city}, Florida`
+      );
+    } else {
+      queries.push(
+        `wedding vendors near ${city}, Florida`,
+        `wedding services ${city}, FL`,
+        `wedding businesses in ${city}, Florida`
+      );
+    }
 
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Goog-Api-Key': process.env.GOOGLE_PLACES_API_KEY,
-        'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.rating,places.websiteUri,places.location,places.types,places.businessStatus'
-      },
-      body: JSON.stringify({
-        textQuery: searchQuery,
-        languageCode: "en",
-        maxResultCount: 20,
-        locationBias: {
-          circle: {
-            center: {
-              latitude: 27.6648,  // Central Florida coordinates
-              longitude: -81.5158
-            },
-            radius: 300000.0  // 300km radius to cover most of Florida
+    let allVendors: Vendor[] = [];
+    
+    // Try each query until we find results
+    for (const searchQuery of queries) {
+      console.log('Trying Google Places search query:', searchQuery);
+      
+      const response = await fetch('https://places.googleapis.com/v1/places:searchText', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Goog-Api-Key': process.env.GOOGLE_PLACES_API_KEY,
+          'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.rating,places.websiteUri,places.location'
+        },
+        body: JSON.stringify({
+          textQuery: searchQuery,
+          languageCode: "en",
+          maxResultCount: 20,
+          locationRestriction: {
+            rectangle: {
+              low: { latitude: 24.396308, longitude: -87.634896 }, // SW Florida
+              high: { latitude: 31.000888, longitude: -79.974306 }  // NE Florida
+            }
           }
-        }
-      })
-    });
+        })
+      });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Google Places API error response:', errorText);
-      throw new Error(`Google Places API error: ${response.status}`);
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Google Places API error:', errorText);
+        console.error('Failed query:', searchQuery);
+        continue;
+      }
+
+      const data = await response.json();
+      console.log('Places API Response:', JSON.stringify(data, null, 2));
+      
+      if (data.places && Array.isArray(data.places)) {
+        const vendors = data.places
+          .filter((place: any) => {
+            // Basic validation of required fields
+            return place.displayName?.text && place.formattedAddress;
+          })
+          .map((place: any) => ({
+            name: place.displayName.text,
+            address: place.formattedAddress,
+            rating: place.rating?.value,
+            website: place.websiteUri,
+            location: place.location ? {
+              latitude: place.location.latitude,
+              longitude: place.location.longitude
+            } : undefined,
+            placeId: place.id,
+            city: city.toLowerCase(),
+            category: category?.toLowerCase(),
+            lastUpdated: new Date()
+          }));
+
+        if (vendors.length > 0) {
+          allVendors = [...allVendors, ...vendors];
+          console.log(`Found ${vendors.length} vendors with query: ${searchQuery}`);
+          break; // Stop if we found results
+        }
+      }
     }
 
-    const data = await response.json();
-    console.log('Raw API response:', JSON.stringify(data, null, 2));
-    
-    if (!data.places || !Array.isArray(data.places)) {
-      console.error('Unexpected API response format:', data);
-      return [];
-    }
-
-    console.log(`Found ${data.places.length} results from Google Places`);
-    
-    const vendors = data.places
-      .map((place: any) => {
-        const name = place.displayName?.text || '';
-        const address = place.formattedAddress || '';
-        
-        // Skip vendors without required fields
-        if (!name || !address) {
-          return null;
-        }
-
-        const vendor: Vendor = {
-          name,
-          address,
-          rating: place.rating?.value,
-          website: place.websiteUri,
-          location: place.location ? {
-            latitude: place.location.latitude,
-            longitude: place.location.longitude
-          } : undefined,
-          placeId: place.id,
-          city: city.toLowerCase(),
-          category: category?.toLowerCase(),
-          lastUpdated: new Date()
-        };
-        console.log('Processed vendor:', vendor);
-        return vendor;
-      })
-      .filter((vendor: Vendor | null): vendor is Vendor => vendor !== null);
-
-    console.log(`Filtered to ${vendors.length} valid vendors`);
-    return vendors;
+    // Remove duplicates based on placeId
+    const uniqueVendors = Array.from(new Map(allVendors.map(v => [v.placeId, v])).values());
+    console.log(`Returning ${uniqueVendors.length} unique vendors`);
+    return uniqueVendors;
   } catch (error) {
     console.error('Error in fetchFromGooglePlaces:', error);
     console.error('Error details:', error instanceof Error ? error.message : error);

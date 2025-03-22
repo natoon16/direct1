@@ -1,5 +1,6 @@
 import { categories } from '@/data/keywords';
 import VendorCard from '@/components/VendorCard';
+import { Place } from '@/lib/places';
 
 export async function generateStaticParams() {
   return categories.map((category) => ({
@@ -16,6 +17,24 @@ export default function CategoryPage({ params }: { params: { category: string } 
     return <div>Category not found</div>;
   }
 
+  // Create a sample place that matches the Place interface
+  const sampleVendor: Place = {
+    place_id: "sample-" + category.slug.toLowerCase(),
+    name: "Sample " + category.title + " Vendor",
+    formatted_address: "Orlando, FL",
+    rating: 5,
+    user_ratings_total: 25,
+    photos: ["/placeholder-vendor.jpg"],
+    geometry: {
+      location: {
+        lat: 28.5383,
+        lng: -81.3792
+      }
+    },
+    types: [category.slug.toLowerCase()],
+    business_status: "OPERATIONAL"
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="mb-8 text-4xl font-bold">{category.title} in Florida</h1>
@@ -24,18 +43,8 @@ export default function CategoryPage({ params }: { params: { category: string } 
       </p>
       
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {/* Placeholder for vendor cards - will be replaced with actual data */}
-        <VendorCard
-          vendor={{
-            name: "Sample " + category.title + " Vendor",
-            address: "Orlando, FL",
-            category: category.title,
-            description: `Professional wedding ${category.title.toLowerCase()} services`,
-            rating: 5,
-            reviews: 25,
-            photos: ["/placeholder-vendor.jpg"]
-          }}
-        />
+        {/* Sample vendor card */}
+        <VendorCard vendor={sampleVendor} />
       </div>
     </div>
   );

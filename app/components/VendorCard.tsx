@@ -25,7 +25,7 @@ export default function VendorCard({ vendor }: VendorCardProps) {
       )}
       <div className="flex flex-col flex-1 p-4">
         <h3 className="text-xl font-semibold text-gray-900">{vendor.name}</h3>
-        <p className="mt-1 text-sm text-gray-500">{vendor.address}</p>
+        <p className="mt-1 text-sm text-gray-500">{vendor.formatted_address}</p>
         {vendor.rating && (
           <div className="mt-2 flex items-center">
             <div className="flex items-center">
@@ -41,7 +41,7 @@ export default function VendorCard({ vendor }: VendorCardProps) {
               ))}
             </div>
             <p className="ml-2 text-sm text-gray-500">
-              {vendor.reviews ? `(${vendor.reviews} reviews)` : ''}
+              {vendor.user_ratings_total ? `(${vendor.user_ratings_total} reviews)` : ''}
             </p>
           </div>
         )}

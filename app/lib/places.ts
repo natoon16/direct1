@@ -5,19 +5,19 @@ const MONGODB_URI = process.env.MONGODB_URI!;
 const GOOGLE_PLACES_API_KEY = process.env.GOOGLE_PLACES_API_KEY!;
 
 export interface Place {
-  id: string;
+  place_id: string;
   name: string;
-  address: string;
-  rating?: number;
-  reviews?: number;
-  photos?: string[];
+  formatted_address: string;
   website?: string;
-  category?: string;
-  description?: string;
-  latitude?: number;
-  longitude?: number;
-  place_id?: string;
-  formatted_address?: string;
+  rating?: number;
+  user_ratings_total?: number;
+  photos?: string[];
+  geometry?: {
+    location: {
+      lat: number;
+      lng: number;
+    }
+  };
   types?: string[];
   business_status?: string;
 }
@@ -69,12 +69,20 @@ export const searchPlaces = cache(async (query: string, city: string, category: 
     
     // Transform the results
     const places: Place[] = data.results.map((result: any) => ({
-      id: result.place_id,
+      place_id: result.place_id,
       name: result.name,
-      address: result.formatted_address,
+      formatted_address: result.formatted_address,
       rating: result.rating,
-      latitude: result.geometry.location.lat,
-      longitude: result.geometry.location.lng
+      user_ratings_total: result.user_ratings_total,
+      photos: result.photos?.map((photo: any) => photo.photo_reference),
+      geometry: {
+        location: {
+          lat: result.geometry.location.lat,
+          lng: result.geometry.location.lng
+        }
+      },
+      types: result.types,
+      business_status: result.business_status
     }));
 
     // Cache the results

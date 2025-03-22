@@ -1,4 +1,4 @@
-import { cities } from '@/data/cities';
+import { cities } from '../../data/cities';
 import VendorCard from '../../components/VendorCard';
 import { Place } from '../../lib/places';
 

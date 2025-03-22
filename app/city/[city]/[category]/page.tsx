@@ -1,5 +1,5 @@
-import { cities } from '@/data/cities';
-import { categories } from '@/data/keywords';
+import { cities } from '../../../data/cities';
+import { categories } from '../../../data/keywords';
 import VendorCard from '../../../components/VendorCard';
 import { Place } from '../../../lib/places';
 

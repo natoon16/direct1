@@ -1,4 +1,4 @@
-import { categories } from '@/data/keywords';
+import { categories } from '../../data/keywords';
 import VendorCard from '../../components/VendorCard';
 import { Place } from '../../lib/places';
 

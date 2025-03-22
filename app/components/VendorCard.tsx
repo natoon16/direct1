@@ -7,16 +7,12 @@ interface VendorCardProps {
 }
 
 export default function VendorCard({ vendor }: VendorCardProps) {
-  const photoUrl = vendor.photos && vendor.photos.length > 0
-    ? `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photo_reference=${vendor.photos[0].photo_reference}&key=${process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY}`
-    : null;
-
   return (
     <div className="flex flex-col overflow-hidden rounded-lg shadow-lg bg-white">
-      {photoUrl ? (
+      {vendor.photos && vendor.photos.length > 0 ? (
         <div className="relative h-48 w-full">
           <Image
-            src={photoUrl}
+            src={vendor.photos[0]}
             alt={vendor.name}
             fill
             className="object-cover"

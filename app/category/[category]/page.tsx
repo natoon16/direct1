@@ -30,12 +30,7 @@ export default function CategoryPage({ params }: { params: { category: string } 
     },
     rating: 5,
     user_ratings_total: 25,
-    photos: [{
-      photo_reference: "sample-photo",
-      height: 400,
-      width: 600,
-      html_attributions: []
-    }],
+    photos: ["/placeholder-vendor.jpg"],
     types: [category.slug.toLowerCase()],
     business_status: "OPERATIONAL"
   };

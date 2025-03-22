@@ -26,12 +26,7 @@ export interface Place {
   };
   rating?: number;
   user_ratings_total?: number;
-  photos?: {
-    photo_reference: string;
-    height: number;
-    width: number;
-    html_attributions: string[];
-  }[];
+  photos?: string[];  // Simplified photo structure - just array of URLs
   website?: string;
   types?: string[];
   business_status?: string;
@@ -92,12 +87,7 @@ export const searchPlaces = cache(async (query: string, city: string, category: 
       formatted_address: result.formatted_address,
       rating: result.rating,
       user_ratings_total: result.user_ratings_total,
-      photos: result.photos?.map((photo: any) => ({
-        photo_reference: photo.photo_reference,
-        height: photo.height,
-        width: photo.width,
-        html_attributions: photo.html_attributions
-      })),
+      photos: result.photos?.map((photo: any) => photo.photo_reference) || [],
       geometry: {
         location: {
           lat: result.geometry.location.lat,

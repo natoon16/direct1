@@ -1,4 +1,4 @@
-import { MongoClient, Document } from 'mongodb';
+import { MongoClient, Document, MongoClientOptions } from 'mongodb';
 import { cache } from 'react';
 
 if (!process.env.MONGODB_URI) {
@@ -6,7 +6,15 @@ if (!process.env.MONGODB_URI) {
 }
 
 const uri = process.env.MONGODB_URI;
-const options = {};
+const options: MongoClientOptions = {
+  connectTimeoutMS: 10000,
+  socketTimeoutMS: 10000,
+  serverSelectionTimeoutMS: 10000,
+  retryWrites: true,
+  retryReads: true,
+  maxPoolSize: 10,
+  minPoolSize: 5
+};
 
 let client: MongoClient;
 let clientPromise: Promise<MongoClient>;
@@ -68,7 +76,13 @@ const SIX_MONTHS = 15778800000;
 export const getVendors = cache(async (city: string, category?: string) => {
   try {
     console.log('Getting vendors for:', { city, category });
-    const client = await clientPromise;
+    const client = await Promise.race([
+      clientPromise,
+      new Promise<MongoClient>((_, reject) => 
+        setTimeout(() => reject(new Error('MongoDB connection timeout')), 5000)
+      )
+    ]);
+
     const db = client.db("weddingDirectory");
     const collection = db.collection<Vendor>("vendors");
 
@@ -82,7 +96,14 @@ export const getVendors = cache(async (city: string, category?: string) => {
     }
 
     console.log('MongoDB query:', query);
-    const vendors = await collection.find(query).toArray();
+    
+    // Add timeout to the find operation
+    const findPromise: Promise<Vendor[]> = collection.find(query).toArray();
+    const timeoutPromise = new Promise<Vendor[]>((_, reject) => 
+      setTimeout(() => reject(new Error('MongoDB query timeout')), 5000)
+    );
+    
+    const vendors = await Promise.race([findPromise, timeoutPromise]);
     console.log('Found vendors in MongoDB:', vendors.length);
 
     if (vendors.length === 0) {
@@ -100,16 +121,33 @@ export const getVendors = cache(async (city: string, category?: string) => {
           address: vendor.address || ''
         }));
         
-        console.log('Inserting new vendors into MongoDB:', vendorsToInsert.length);
-        await collection.insertMany(vendorsToInsert);
-        return vendorsToInsert;
+        try {
+          console.log('Inserting new vendors into MongoDB:', vendorsToInsert.length);
+          const insertPromise = collection.insertMany(vendorsToInsert);
+          const insertTimeoutPromise = new Promise<any>((_, reject) => 
+            setTimeout(() => reject(new Error('MongoDB insert timeout')), 5000)
+          );
+          
+          await Promise.race([insertPromise, insertTimeoutPromise]);
+          return vendorsToInsert;
+        } catch (insertError) {
+          console.error('Error inserting vendors:', insertError);
+          return newVendors; // Return the vendors even if we couldn't cache them
+        }
       }
     }
 
     return vendors;
   } catch (error) {
     console.error('Error in getVendors:', error);
-    return [];
+    // If MongoDB fails, try to get vendors directly from Google Places
+    try {
+      console.log('MongoDB failed, falling back to Google Places...');
+      return await fetchFromGooglePlaces(city, category);
+    } catch (fallbackError) {
+      console.error('Fallback to Google Places failed:', fallbackError);
+      return [];
+    }
   }
 });
 

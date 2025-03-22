@@ -57,7 +57,7 @@ export default async function CityPage({ params, searchParams }: Props) {
               {vendor.photo && (
                 <div className="h-48 w-full bg-gray-200">
                   <img
-                    src={`https://places.googleapis.com/v1/${vendor.photo}/media?key=${process.env.GOOGLE_PLACES_API_KEY}&maxHeightPx=400`}
+                    src={`https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photo_reference=${vendor.photo}&key=${process.env.GOOGLE_PLACES_API_KEY}`}
                     alt={vendor.name}
                     className="w-full h-full object-cover"
                   />

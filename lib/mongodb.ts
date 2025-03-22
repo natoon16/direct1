@@ -124,14 +124,19 @@ async function fetchFromGooglePlaces(city: string, category?: string): Promise<P
       : `wedding venues in ${city}, Florida`;
     console.log('Google Places search query:', searchQuery);
     
-    const url = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(searchQuery)}&key=${process.env.GOOGLE_PLACES_API_KEY}&type=establishment`;
-    console.log('Google Places API URL:', url);
+    const url = 'https://places.googleapis.com/v1/places:searchText';
+    console.log('Using new Google Places API endpoint');
 
     const response = await fetch(url, {
-      method: 'GET',
+      method: 'POST',
       headers: {
-        'Accept': 'application/json'
-      }
+        'Content-Type': 'application/json',
+        'X-Goog-Api-Key': process.env.GOOGLE_PLACES_API_KEY,
+        'X-Goog-FieldMask': 'places.displayName,places.formattedAddress,places.rating,places.websiteUri,places.location,places.id'
+      },
+      body: JSON.stringify({
+        textQuery: searchQuery
+      })
     });
 
     if (!response.ok) {
@@ -141,31 +146,26 @@ async function fetchFromGooglePlaces(city: string, category?: string): Promise<P
     }
 
     const data = await response.json();
+    console.log('Raw API response:', JSON.stringify(data, null, 2));
     
-    if (data.status !== 'OK') {
-      console.error('Google Places API returned non-OK status:', data.status);
-      console.error('Error message:', data.error_message);
-      return [];
-    }
-
-    if (!data.results || !Array.isArray(data.results)) {
+    if (!data.places || !Array.isArray(data.places)) {
       console.error('Unexpected API response format:', data);
       return [];
     }
 
-    console.log(`Found ${data.results.length} results from Google Places`);
+    console.log(`Found ${data.places.length} results from Google Places`);
     
-    const vendors = data.results.map((place: GooglePlace) => {
+    const vendors = data.places.map((place: any) => {
       const vendor = {
-        name: place.name,
-        address: place.formatted_address,
+        name: place.displayName?.text || place.displayName,
+        address: place.formattedAddress,
         rating: place.rating,
-        website: place.website,
-        location: place.geometry?.location ? {
-          latitude: place.geometry.location.lat,
-          longitude: place.geometry.location.lng
+        website: place.websiteUri,
+        location: place.location ? {
+          latitude: place.location.latitude,
+          longitude: place.location.longitude
         } : undefined,
-        placeId: place.place_id
+        placeId: place.id
       };
       console.log('Processed vendor:', vendor);
       return vendor;
@@ -174,6 +174,7 @@ async function fetchFromGooglePlaces(city: string, category?: string): Promise<P
     return vendors;
   } catch (error) {
     console.error('Error in fetchFromGooglePlaces:', error);
+    console.error('Error details:', error instanceof Error ? error.message : error);
     return [];
   }
 } 

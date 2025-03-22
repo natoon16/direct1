@@ -5,6 +5,7 @@ const MONGODB_URI = process.env.MONGODB_URI!;
 const GOOGLE_PLACES_API_KEY = process.env.GOOGLE_PLACES_API_KEY!;
 
 export interface Place {
+  id: string;
   name: string;
   address: string;
   rating?: number;
@@ -13,6 +14,12 @@ export interface Place {
   website?: string;
   category?: string;
   description?: string;
+  latitude?: number;
+  longitude?: number;
+  place_id?: string;
+  formatted_address?: string;
+  types?: string[];
+  business_status?: string;
 }
 
 interface CacheEntry {

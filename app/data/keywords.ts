@@ -16,6 +16,11 @@ export const categories: Category[] = [
     slug: 'photographers'
   },
   {
+    name: 'planner',
+    title: 'Wedding Planners',
+    slug: 'planners'
+  },
+  {
     name: 'videographer',
     title: 'Wedding Videographers',
     slug: 'videographers'
@@ -36,9 +41,24 @@ export const categories: Category[] = [
     slug: 'caterers'
   },
   {
-    name: 'planner',
-    title: 'Wedding Planners',
-    slug: 'planners'
+    name: 'dress',
+    title: 'Wedding Dress Shops',
+    slug: 'dresses'
+  },
+  {
+    name: 'makeup-artist',
+    title: 'Wedding Makeup Artists',
+    slug: 'makeup-artists'
+  },
+  {
+    name: 'hair-stylist',
+    title: 'Wedding Hair Stylists',
+    slug: 'hair-stylists'
+  },
+  {
+    name: 'band',
+    title: 'Wedding Bands',
+    slug: 'bands'
   },
   {
     name: 'bakery',
@@ -46,18 +66,68 @@ export const categories: Category[] = [
     slug: 'bakeries'
   },
   {
-    name: 'dress',
-    title: 'Wedding Dress Shops',
-    slug: 'dresses'
+    name: 'officiant',
+    title: 'Wedding Officiants',
+    slug: 'officiants'
   },
   {
-    name: 'makeup artist',
-    title: 'Wedding Makeup Artists',
-    slug: 'makeup-artists'
+    name: 'rental',
+    title: 'Wedding Rentals',
+    slug: 'rentals'
   },
   {
-    name: 'hair stylist',
-    title: 'Wedding Hair Stylists',
-    slug: 'hair-stylists'
+    name: 'transportation',
+    title: 'Wedding Transportation',
+    slug: 'transportation'
+  },
+  {
+    name: 'jewelry',
+    title: 'Wedding Jewelry',
+    slug: 'jewelry'
+  },
+  {
+    name: 'invitation',
+    title: 'Wedding Invitations',
+    slug: 'invitations'
+  },
+  {
+    name: 'photo-booth',
+    title: 'Photo Booth Rentals',
+    slug: 'photo-booths'
+  },
+  {
+    name: 'lighting',
+    title: 'Wedding Lighting',
+    slug: 'lighting'
+  },
+  {
+    name: 'coordinator',
+    title: 'Day-of Coordinators',
+    slug: 'coordinators'
+  },
+  {
+    name: 'dance',
+    title: 'Dance Lessons',
+    slug: 'dance-lessons'
+  },
+  {
+    name: 'alterations',
+    title: 'Wedding Dress Alterations',
+    slug: 'alterations'
+  },
+  {
+    name: 'decor',
+    title: 'Wedding Decorations',
+    slug: 'decor'
+  },
+  {
+    name: 'favors',
+    title: 'Wedding Favors',
+    slug: 'favors'
+  },
+  {
+    name: 'rehearsal',
+    title: 'Rehearsal Dinner Venues',
+    slug: 'rehearsal-venues'
   }
 ]; 

@@ -22,38 +22,58 @@ export default function SearchBox() {
   };
 
   return (
-    <form onSubmit={handleSearch} className="mt-8 flex flex-col gap-4 sm:flex-row sm:gap-4">
+    <form onSubmit={handleSearch} className="mt-8 flex flex-col gap-4 sm:flex-row sm:gap-4 max-w-4xl mx-auto">
       <div className="relative flex-1">
         <select
           value={selectedCity}
           onChange={(e) => setSelectedCity(e.target.value)}
-          className="block w-full rounded-lg border border-gray-300 bg-white py-3 pl-4 pr-10 text-gray-900 text-base focus:border-purple-500 focus:outline-none focus:ring-purple-500"
+          className="block w-full rounded-lg border border-gray-300 bg-white py-3 pl-4 pr-10 text-gray-900 text-base focus:border-purple-500 focus:outline-none focus:ring-purple-500 h-[50px]"
+          style={{ maxHeight: '50px' }}
         >
           <option value="" className="text-gray-500">Select a city</option>
-          {cities.map((city) => (
-            <option key={city.name} value={city.name} className="text-gray-900">
-              {city.name}
-            </option>
-          ))}
+          <optgroup label="Major Cities">
+            {cities.slice(0, 5).map((city) => (
+              <option key={city.name} value={city.name} className="text-gray-900">
+                {city.name} ({city.county} County)
+              </option>
+            ))}
+          </optgroup>
+          <optgroup label="All Cities">
+            {cities.slice(5).map((city) => (
+              <option key={city.name} value={city.name} className="text-gray-900">
+                {city.name} ({city.county} County)
+              </option>
+            ))}
+          </optgroup>
         </select>
       </div>
       <div className="relative flex-1">
         <select
           value={selectedCategory}
           onChange={(e) => setSelectedCategory(e.target.value)}
-          className="block w-full rounded-lg border border-gray-300 bg-white py-3 pl-4 pr-10 text-gray-900 text-base focus:border-purple-500 focus:outline-none focus:ring-purple-500"
+          className="block w-full rounded-lg border border-gray-300 bg-white py-3 pl-4 pr-10 text-gray-900 text-base focus:border-purple-500 focus:outline-none focus:ring-purple-500 h-[50px]"
+          style={{ maxHeight: '50px' }}
         >
           <option value="" className="text-gray-500">Select a category</option>
-          {categories.map((category) => (
-            <option key={category.slug} value={category.slug} className="text-gray-900">
-              {category.title}
-            </option>
-          ))}
+          <optgroup label="Popular Categories">
+            {categories.slice(0, 8).map((category) => (
+              <option key={category.slug} value={category.slug} className="text-gray-900">
+                {category.title}
+              </option>
+            ))}
+          </optgroup>
+          <optgroup label="More Categories">
+            {categories.slice(8).map((category) => (
+              <option key={category.slug} value={category.slug} className="text-gray-900">
+                {category.title}
+              </option>
+            ))}
+          </optgroup>
         </select>
       </div>
       <button
         type="submit"
-        className="inline-flex items-center justify-center rounded-lg bg-purple-600 px-6 py-3 text-base font-medium text-white hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+        className="inline-flex items-center justify-center rounded-lg bg-purple-600 px-6 py-3 text-base font-medium text-white hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 h-[50px]"
       >
         Search
       </button>

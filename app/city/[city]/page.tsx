@@ -1,7 +1,29 @@
 import React from 'react';
 import { getVendors } from '../../../lib/mongodb';
 import { notFound } from 'next/navigation';
+import Link from 'next/link';
 import { cities } from '../../../data/cities';
+
+const categories = [
+  { slug: 'venues', display: 'Venues' },
+  { slug: 'photography', display: 'Photography' },
+  { slug: 'videography', display: 'Videography' },
+  { slug: 'wedding-planners', display: 'Wedding Planners' },
+  { slug: 'catering', display: 'Catering' },
+  { slug: 'florists', display: 'Florists' },
+  { slug: 'djs', display: 'DJs' },
+  { slug: 'bands', display: 'Bands' },
+  { slug: 'hair-makeup', display: 'Hair & Makeup' },
+  { slug: 'dresses-attire', display: 'Dresses & Attire' },
+  { slug: 'jewelry', display: 'Jewelry' },
+  { slug: 'transportation', display: 'Transportation' },
+  { slug: 'invitations', display: 'Invitations' },
+  { slug: 'favors-gifts', display: 'Favors & Gifts' },
+  { slug: 'rentals', display: 'Rentals' },
+  { slug: 'officiants', display: 'Officiants' },
+  { slug: 'bakeries', display: 'Bakeries' },
+  { slug: 'decor', display: 'Decor' }
+];
 
 interface Vendor {
   name: string;
@@ -26,12 +48,17 @@ export default async function CityPage({ params, searchParams }: Props) {
     notFound();
   }
 
-  console.log('Fetching vendors for:', normalizedCity, searchParams.category);
-  const vendors = await getVendors(normalizedCity, searchParams.category);
+  // Find the category object based on the search param
+  const category = searchParams.category && searchParams.category.length > 0
+    ? categories.find(c => c.slug === searchParams.category.toLowerCase())
+    : undefined;
+
+  console.log('Fetching vendors for:', normalizedCity, category?.slug);
+  const vendors = await getVendors(normalizedCity, category?.slug);
   console.log('Found vendors:', vendors.length);
 
-  const title = searchParams.category 
-    ? `Top 10 Best ${searchParams.category} in ${normalizedCity}, Florida`
+  const title = category 
+    ? `Top 10 Best ${category.display} in ${normalizedCity}, Florida`
     : `Best Wedding Vendors in ${normalizedCity}, Florida`;
 
   return (
@@ -40,19 +67,23 @@ export default async function CityPage({ params, searchParams }: Props) {
         <nav className="text-sm mb-4" aria-label="Breadcrumb">
           <ol className="list-none p-0 inline-flex">
             <li className="flex items-center">
-              <a href="/" className="text-purple-600 hover:text-purple-800">Home</a>
+              <Link href="/" className="text-purple-600 hover:text-purple-800">
+                Home
+              </Link>
               <span className="mx-2 text-gray-500">/</span>
             </li>
             <li className="flex items-center">
-              <a href="/cities" className="text-purple-600 hover:text-purple-800">Cities</a>
+              <Link href="/cities" className="text-purple-600 hover:text-purple-800">
+                Cities
+              </Link>
               <span className="mx-2 text-gray-500">/</span>
             </li>
             <li className="flex items-center">
               <span className="text-gray-700">{normalizedCity}</span>
-              {searchParams.category && (
+              {category && (
                 <>
                   <span className="mx-2 text-gray-500">/</span>
-                  <span className="text-gray-700">{searchParams.category}</span>
+                  <span className="text-gray-700">{category.display}</span>
                 </>
               )}
             </li>
@@ -62,7 +93,7 @@ export default async function CityPage({ params, searchParams }: Props) {
         <h1 className="text-4xl font-bold mb-4">{title}</h1>
         
         <p className="text-lg mb-8">
-          Discover the best wedding vendors in {normalizedCity}, Florida. Our directory features top-rated professionals ready to make your special day perfect.
+          Discover the best {category ? `${category.display.toLowerCase()} vendors` : 'wedding vendors'} in {normalizedCity}, Florida.
         </p>
       </div>
 

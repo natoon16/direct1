@@ -5,24 +5,24 @@ import Link from 'next/link';
 import { cities } from '../../../data/cities';
 
 const categories = [
-  'venues',
-  'photography',
-  'videography',
-  'wedding-planners',
-  'catering',
-  'florists',
-  'djs',
-  'bands',
-  'hair-makeup',
-  'dresses-attire',
-  'jewelry',
-  'transportation',
-  'invitations',
-  'favors-gifts',
-  'rentals',
-  'officiants',
-  'bakeries',
-  'decor'
+  { slug: 'venues', display: 'Venues' },
+  { slug: 'photography', display: 'Photography' },
+  { slug: 'videography', display: 'Videography' },
+  { slug: 'wedding-planners', display: 'Wedding Planners' },
+  { slug: 'catering', display: 'Catering' },
+  { slug: 'florists', display: 'Florists' },
+  { slug: 'djs', display: 'DJs' },
+  { slug: 'bands', display: 'Bands' },
+  { slug: 'hair-makeup', display: 'Hair & Makeup' },
+  { slug: 'dresses-attire', display: 'Dresses & Attire' },
+  { slug: 'jewelry', display: 'Jewelry' },
+  { slug: 'transportation', display: 'Transportation' },
+  { slug: 'invitations', display: 'Invitations' },
+  { slug: 'favors-gifts', display: 'Favors & Gifts' },
+  { slug: 'rentals', display: 'Rentals' },
+  { slug: 'officiants', display: 'Officiants' },
+  { slug: 'bakeries', display: 'Bakeries' },
+  { slug: 'decor', display: 'Decor' }
 ];
 
 interface Props {
@@ -31,20 +31,13 @@ interface Props {
 
 export default async function CategoryPage({ params }: Props) {
   const categorySlug = params.category;
-  const normalizedCategory = categories.find(
-    c => c === categorySlug.toLowerCase()
+  const category = categories.find(
+    c => c.slug === categorySlug.toLowerCase()
   );
 
-  if (!normalizedCategory) {
+  if (!category) {
     notFound();
   }
-
-  // Convert slug back to display format
-  const displayCategory = normalizedCategory
-    .split('-')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ')
-    .replace('Djs', 'DJs');
 
   return (
     <div className="container mx-auto px-4 py-16">
@@ -64,16 +57,16 @@ export default async function CategoryPage({ params }: Props) {
               <span className="mx-2 text-gray-500">/</span>
             </li>
             <li className="flex items-center">
-              <span className="text-gray-700">{displayCategory}</span>
+              <span className="text-gray-700">{category.display}</span>
             </li>
           </ol>
         </nav>
 
         <h1 className="text-4xl font-bold mb-4">
-          {displayCategory} in Florida
+          {category.display} in Florida
         </h1>
         <p className="text-lg mb-8">
-          Find the best wedding {displayCategory.toLowerCase()} in major Florida cities.
+          Find the best wedding {category.display.toLowerCase()} in major Florida cities.
         </p>
       </div>
 
@@ -85,14 +78,14 @@ export default async function CategoryPage({ params }: Props) {
           >
             <h2 className="text-xl font-semibold mb-4">{city}</h2>
             <p className="text-gray-600 mb-4">
-              Discover top wedding {displayCategory.toLowerCase()} in {city}, Florida.
+              Discover top wedding {category.display.toLowerCase()} in {city}, Florida.
             </p>
             <div className="mt-auto">
               <Link
-                href={`/city/${city.toLowerCase()}?category=${normalizedCategory}`}
+                href={`/city/${city.toLowerCase()}?category=${category.display.toLowerCase()}`}
                 className="inline-block px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors"
               >
-                View {displayCategory} in {city}
+                View {category.display} in {city}
               </Link>
             </div>
           </div>

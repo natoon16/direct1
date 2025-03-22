@@ -2,24 +2,24 @@ import React from 'react';
 import Link from 'next/link';
 
 const categories = [
-  'Venues',
-  'Photography',
-  'Videography',
-  'Wedding Planners',
-  'Catering',
-  'Florists',
-  'DJs',
-  'Bands',
-  'Hair & Makeup',
-  'Dresses & Attire',
-  'Jewelry',
-  'Transportation',
-  'Invitations',
-  'Favors & Gifts',
-  'Rentals',
-  'Officiants',
-  'Bakeries',
-  'Decor'
+  { slug: 'venues', display: 'Venues' },
+  { slug: 'photography', display: 'Photography' },
+  { slug: 'videography', display: 'Videography' },
+  { slug: 'wedding-planners', display: 'Wedding Planners' },
+  { slug: 'catering', display: 'Catering' },
+  { slug: 'florists', display: 'Florists' },
+  { slug: 'djs', display: 'DJs' },
+  { slug: 'bands', display: 'Bands' },
+  { slug: 'hair-makeup', display: 'Hair & Makeup' },
+  { slug: 'dresses-attire', display: 'Dresses & Attire' },
+  { slug: 'jewelry', display: 'Jewelry' },
+  { slug: 'transportation', display: 'Transportation' },
+  { slug: 'invitations', display: 'Invitations' },
+  { slug: 'favors-gifts', display: 'Favors & Gifts' },
+  { slug: 'rentals', display: 'Rentals' },
+  { slug: 'officiants', display: 'Officiants' },
+  { slug: 'bakeries', display: 'Bakeries' },
+  { slug: 'decor', display: 'Decor' }
 ];
 
 export const metadata = {
@@ -54,19 +54,19 @@ export default function CategoriesPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {categories.map((category) => (
           <div
-            key={category}
+            key={category.slug}
             className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow"
           >
-            <h2 className="text-xl font-semibold mb-4">{category}</h2>
+            <h2 className="text-xl font-semibold mb-4">{category.display}</h2>
             <p className="text-gray-600 mb-4">
-              Find the best {category.toLowerCase()} for your wedding in Florida.
+              Find the best {category.display.toLowerCase()} for your wedding in Florida.
             </p>
             <div className="mt-auto">
               <Link
-                href={`/category/${category.toLowerCase().replace(/ & /g, '-').replace(/ /g, '-')}`}
+                href={`/category/${category.slug}`}
                 className="inline-block px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors"
               >
-                View {category}
+                View {category.display}
               </Link>
             </div>
           </div>

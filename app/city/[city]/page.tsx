@@ -1,6 +1,7 @@
 import { cities } from '../../data/cities';
 import VendorCard from '../../components/VendorCard';
 import { Place } from '../../lib/places';
+import { notFound } from 'next/navigation';
 
 export async function generateStaticParams() {
   return cities.map((city) => ({
@@ -14,7 +15,7 @@ export default function CityPage({ params }: { params: { city: string } }) {
   );
 
   if (!city) {
-    return <div>City not found</div>;
+    notFound();
   }
 
   // Create a sample place that matches the Place interface
@@ -43,10 +44,7 @@ export default function CityPage({ params }: { params: { city: string } }) {
       </p>
       
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {/* Placeholder for vendor cards - will be replaced with actual data */}
-        <VendorCard
-          vendor={sampleVendor}
-        />
+        <VendorCard vendor={sampleVendor} />
       </div>
     </div>
   );

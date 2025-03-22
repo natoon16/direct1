@@ -1,6 +1,7 @@
 import { categories } from '../../data/keywords';
 import VendorCard from '../../components/VendorCard';
 import { Place } from '../../lib/places';
+import { notFound } from 'next/navigation';
 
 export async function generateStaticParams() {
   return categories.map((category) => ({
@@ -14,7 +15,7 @@ export default function CategoryPage({ params }: { params: { category: string } 
   );
 
   if (!category) {
-    return <div>Category not found</div>;
+    notFound();
   }
 
   // Create a sample place that matches the Place interface
@@ -24,7 +25,7 @@ export default function CategoryPage({ params }: { params: { category: string } 
     formatted_address: "Orlando, FL",
     geometry: {
       location: {
-        lat: 28.5383,
+        lat: 28.5383,  // Orlando's coordinates as default
         lng: -81.3792
       }
     },
@@ -43,7 +44,6 @@ export default function CategoryPage({ params }: { params: { category: string } 
       </p>
       
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {/* Sample vendor card */}
         <VendorCard vendor={sampleVendor} />
       </div>
     </div>

@@ -8,18 +8,36 @@ export interface Place {
   place_id: string;
   name: string;
   formatted_address: string;
-  website?: string;
-  rating?: number;
-  user_ratings_total?: number;
-  photos?: string[];
-  geometry?: {
+  geometry: {
     location: {
       lat: number;
       lng: number;
-    }
+    };
+    viewport?: {
+      northeast: {
+        lat: number;
+        lng: number;
+      };
+      southwest: {
+        lat: number;
+        lng: number;
+      };
+    };
   };
+  rating?: number;
+  user_ratings_total?: number;
+  photos?: {
+    photo_reference: string;
+    height: number;
+    width: number;
+    html_attributions: string[];
+  }[];
+  website?: string;
   types?: string[];
   business_status?: string;
+  icon?: string;
+  icon_background_color?: string;
+  icon_mask_base_uri?: string;
 }
 
 interface CacheEntry {
@@ -74,15 +92,24 @@ export const searchPlaces = cache(async (query: string, city: string, category: 
       formatted_address: result.formatted_address,
       rating: result.rating,
       user_ratings_total: result.user_ratings_total,
-      photos: result.photos?.map((photo: any) => photo.photo_reference),
+      photos: result.photos?.map((photo: any) => ({
+        photo_reference: photo.photo_reference,
+        height: photo.height,
+        width: photo.width,
+        html_attributions: photo.html_attributions
+      })),
       geometry: {
         location: {
           lat: result.geometry.location.lat,
           lng: result.geometry.location.lng
-        }
+        },
+        viewport: result.geometry.viewport
       },
       types: result.types,
-      business_status: result.business_status
+      business_status: result.business_status,
+      icon: result.icon,
+      icon_background_color: result.icon_background_color,
+      icon_mask_base_uri: result.icon_mask_base_uri
     }));
 
     // Cache the results

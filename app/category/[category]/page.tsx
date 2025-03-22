@@ -1,6 +1,6 @@
 import { categories } from '@/data/keywords';
-import VendorCard from '@/components/VendorCard';
-import { Place } from '@/lib/places';
+import VendorCard from '../../components/VendorCard';
+import { Place } from '../../lib/places';
 
 export async function generateStaticParams() {
   return categories.map((category) => ({
@@ -22,15 +22,20 @@ export default function CategoryPage({ params }: { params: { category: string } 
     place_id: "sample-" + category.slug.toLowerCase(),
     name: "Sample " + category.title + " Vendor",
     formatted_address: "Orlando, FL",
-    rating: 5,
-    user_ratings_total: 25,
-    photos: ["/placeholder-vendor.jpg"],
     geometry: {
       location: {
         lat: 28.5383,
         lng: -81.3792
       }
     },
+    rating: 5,
+    user_ratings_total: 25,
+    photos: [{
+      photo_reference: "sample-photo",
+      height: 400,
+      width: 600,
+      html_attributions: []
+    }],
     types: [category.slug.toLowerCase()],
     business_status: "OPERATIONAL"
   };

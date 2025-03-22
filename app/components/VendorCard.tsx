@@ -1,4 +1,4 @@
-import { Place } from '@/lib/places';
+import { Place } from '../lib/places';
 import { StarIcon } from '@heroicons/react/20/solid';
 import Image from 'next/image';
 
@@ -7,12 +7,16 @@ interface VendorCardProps {
 }
 
 export default function VendorCard({ vendor }: VendorCardProps) {
+  const photoUrl = vendor.photos && vendor.photos.length > 0
+    ? `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photo_reference=${vendor.photos[0].photo_reference}&key=${process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY}`
+    : null;
+
   return (
     <div className="flex flex-col overflow-hidden rounded-lg shadow-lg bg-white">
-      {vendor.photos && vendor.photos.length > 0 ? (
+      {photoUrl ? (
         <div className="relative h-48 w-full">
           <Image
-            src={vendor.photos[0]}
+            src={photoUrl}
             alt={vendor.name}
             fill
             className="object-cover"

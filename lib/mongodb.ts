@@ -151,7 +151,7 @@ export const getVendors = cache(async (city: string, category?: string) => {
   }
 });
 
-async function fetchFromGooglePlaces(city: string, category?: string): Promise<Partial<Vendor>[]> {
+async function fetchFromGooglePlaces(city: string, category?: string): Promise<Vendor[]> {
   if (!process.env.GOOGLE_PLACES_API_KEY) {
     throw new Error('Google Places API key is missing');
   }
@@ -204,23 +204,34 @@ async function fetchFromGooglePlaces(city: string, category?: string): Promise<P
 
     console.log(`Found ${data.places.length} results from Google Places`);
     
-    const vendors = data.places.map((place: any) => {
-      const vendor = {
-        name: place.displayName?.text || '',
-        address: place.formattedAddress || '',
-        rating: place.rating?.value,
-        website: place.websiteUri,
-        location: place.location ? {
-          latitude: place.location.latitude,
-          longitude: place.location.longitude
-        } : undefined,
-        placeId: place.id
-      };
-      console.log('Processed vendor:', vendor);
-      return vendor;
-    }).filter((vendor: Partial<Vendor>) => 
-      vendor.name && vendor.address // Only include vendors with at least a name and address
-    );
+    const vendors = data.places
+      .map((place: any) => {
+        const name = place.displayName?.text || '';
+        const address = place.formattedAddress || '';
+        
+        // Skip vendors without required fields
+        if (!name || !address) {
+          return null;
+        }
+
+        const vendor: Vendor = {
+          name,
+          address,
+          rating: place.rating?.value,
+          website: place.websiteUri,
+          location: place.location ? {
+            latitude: place.location.latitude,
+            longitude: place.location.longitude
+          } : undefined,
+          placeId: place.id,
+          city: city.toLowerCase(),
+          category: category?.toLowerCase(),
+          lastUpdated: new Date()
+        };
+        console.log('Processed vendor:', vendor);
+        return vendor;
+      })
+      .filter((vendor: Vendor | null): vendor is Vendor => vendor !== null);
 
     console.log(`Filtered to ${vendors.length} valid vendors`);
     return vendors;

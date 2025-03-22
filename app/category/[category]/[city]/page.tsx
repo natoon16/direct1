@@ -68,7 +68,7 @@ export default async function CategoryPage({ params }: Props) {
           <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {places.length > 0 ? (
               places.map((place) => (
-                <VendorCard key={place.id} vendor={place} />
+                <VendorCard key={place.place_id} vendor={place} />
               ))
             ) : (
               <div className="col-span-full text-center py-12">

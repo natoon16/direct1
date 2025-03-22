@@ -13,11 +13,11 @@ export default function SearchBox() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (selectedCity && selectedCategory) {
-      router.push(`/city/${selectedCity.toLowerCase()}/${selectedCategory.toLowerCase()}`);
+      router.push(`/city/${encodeURIComponent(selectedCity.toLowerCase())}?category=${encodeURIComponent(selectedCategory.toLowerCase())}`);
     } else if (selectedCity) {
-      router.push(`/city/${selectedCity.toLowerCase()}`);
+      router.push(`/city/${encodeURIComponent(selectedCity.toLowerCase())}`);
     } else if (selectedCategory) {
-      router.push(`/category/${selectedCategory.toLowerCase()}`);
+      router.push(`/category/${encodeURIComponent(selectedCategory.toLowerCase())}`);
     }
   };
 

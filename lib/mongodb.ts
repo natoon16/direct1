@@ -50,16 +50,20 @@ interface Vendor {
 }
 
 interface GooglePlace {
-  displayName: string;
+  id: string;
+  displayName: {
+    text: string;
+  };
   formattedAddress: string;
-  rating?: number;
+  rating?: {
+    value: number;
+  };
   websiteUri?: string;
   location?: {
     latitude: number;
     longitude: number;
   };
   photos?: Array<{ name: string }>;
-  id: string;
 }
 
 // Cache the database connection for 6 months (in milliseconds)
@@ -86,7 +90,10 @@ export const getVendors = cache(async (city: string, category?: string) => {
 
     // If no vendors found or data is stale, fetch from Google Places API
     if (vendors.length === 0) {
+      console.log('No vendors found in cache, fetching from Google Places...');
       const newVendors = await fetchFromGooglePlaces(city, category);
+      console.log('Fetched vendors:', newVendors.length);
+      
       if (newVendors.length > 0) {
         // Insert new vendors with timestamp
         const vendorsToInsert: Vendor[] = newVendors.map((vendor: Partial<Vendor>) => ({
@@ -116,37 +123,52 @@ async function fetchFromGooglePlaces(city: string, category?: string): Promise<P
   }
 
   try {
-    const searchQuery = `${category || 'wedding'} in ${city}, Florida`;
+    const searchQuery = `${category || 'wedding venue'} in ${city}, Florida`;
+    console.log('Searching Google Places for:', searchQuery);
+    
     const response = await fetch(
-      `https://places.googleapis.com/v1/places:searchText`,
+      'https://places.googleapis.com/v1/places:searchText',
       {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'X-Goog-Api-Key': process.env.GOOGLE_PLACES_API_KEY,
-          'X-Goog-FieldMask': 'places.displayName,places.formattedAddress,places.location,places.rating,places.photos,places.websiteUri'
+          'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.location,places.rating,places.websiteUri,places.photos'
         },
         body: JSON.stringify({
           textQuery: searchQuery,
           locationBias: {
             circle: {
               center: {
-                latitude: 27.6648,  // Approximate center of Florida
+                latitude: 27.6648,
                 longitude: -81.5158
               },
-              radius: 500000.0  // 500km radius to cover all of Florida
+              radius: 500000.0
             }
-          }
+          },
+          maxResultCount: 20
         })
       }
     );
 
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Google Places API error:', errorText);
+      throw new Error(`Google Places API error: ${response.status}`);
+    }
+
     const data = await response.json();
+    console.log('Google Places API response:', JSON.stringify(data, null, 2));
     
-    return (data.places as GooglePlace[] || []).map((place: GooglePlace) => ({
-      name: place.displayName,
+    if (!data.places || !Array.isArray(data.places)) {
+      console.error('Unexpected API response format:', data);
+      return [];
+    }
+
+    return data.places.map((place: GooglePlace) => ({
+      name: place.displayName.text,
       address: place.formattedAddress,
-      rating: place.rating,
+      rating: place.rating?.value,
       website: place.websiteUri,
       location: place.location,
       photo: place.photos?.[0]?.name,

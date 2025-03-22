@@ -2,6 +2,7 @@ import React from 'react';
 import { getVendors } from '../../../lib/mongodb';
 import { notFound } from 'next/navigation';
 import { cities } from '../../../data/cities';
+import Image from 'next/image';
 
 interface Vendor {
   name: string;
@@ -18,7 +19,6 @@ interface Props {
 }
 
 export default async function CityPage({ params, searchParams }: Props) {
-  // Validate city exists in our list
   const cityName = decodeURIComponent(params.city);
   const normalizedCity = cities.find(
     c => c.toLowerCase() === cityName.toLowerCase()
@@ -28,8 +28,9 @@ export default async function CityPage({ params, searchParams }: Props) {
     notFound();
   }
 
-  // Get vendors from MongoDB (which will fetch from Google Places if needed)
+  console.log('Fetching vendors for:', normalizedCity, searchParams.category);
   const vendors = await getVendors(normalizedCity, searchParams.category);
+  console.log('Found vendors:', vendors.length);
 
   return (
     <div className="container mx-auto px-4 py-16">
@@ -51,12 +52,12 @@ export default async function CityPage({ params, searchParams }: Props) {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {vendors.map((vendor: Vendor) => (
-            <div key={vendor.name} className="bg-white rounded-lg shadow-md overflow-hidden">
+          {vendors.map((vendor: Vendor, index: number) => (
+            <div key={`${vendor.name}-${index}`} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
               {vendor.photo && (
                 <div className="h-48 w-full bg-gray-200">
                   <img
-                    src={vendor.photo}
+                    src={`https://places.googleapis.com/v1/${vendor.photo}/media?key=${process.env.GOOGLE_PLACES_API_KEY}&maxHeightPx=400`}
                     alt={vendor.name}
                     className="w-full h-full object-cover"
                   />
@@ -76,7 +77,7 @@ export default async function CityPage({ params, searchParams }: Props) {
                     href={vendor.website}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-purple-600 hover:text-purple-800"
+                    className="inline-block mt-2 px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors"
                   >
                     Visit Website
                   </a>

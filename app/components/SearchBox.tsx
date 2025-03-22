@@ -27,11 +27,11 @@ export default function SearchBox() {
         <select
           value={selectedCity}
           onChange={(e) => setSelectedCity(e.target.value)}
-          className="block w-full rounded-lg border-gray-300 py-3 pl-4 pr-10 text-base focus:border-purple-500 focus:outline-none focus:ring-purple-500"
+          className="block w-full rounded-lg border border-gray-300 bg-white py-3 pl-4 pr-10 text-gray-900 text-base focus:border-purple-500 focus:outline-none focus:ring-purple-500"
         >
-          <option value="">Select a city</option>
+          <option value="" className="text-gray-500">Select a city</option>
           {cities.map((city) => (
-            <option key={city.name} value={city.name}>
+            <option key={city.name} value={city.name} className="text-gray-900">
               {city.name}
             </option>
           ))}
@@ -41,11 +41,11 @@ export default function SearchBox() {
         <select
           value={selectedCategory}
           onChange={(e) => setSelectedCategory(e.target.value)}
-          className="block w-full rounded-lg border-gray-300 py-3 pl-4 pr-10 text-base focus:border-purple-500 focus:outline-none focus:ring-purple-500"
+          className="block w-full rounded-lg border border-gray-300 bg-white py-3 pl-4 pr-10 text-gray-900 text-base focus:border-purple-500 focus:outline-none focus:ring-purple-500"
         >
-          <option value="">Select a category</option>
+          <option value="" className="text-gray-500">Select a category</option>
           {categories.map((category) => (
-            <option key={category.slug} value={category.slug}>
+            <option key={category.slug} value={category.slug} className="text-gray-900">
               {category.title}
             </option>
           ))}

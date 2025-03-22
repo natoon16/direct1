@@ -1,26 +1,29 @@
-import './globals.css';
+import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
+import './globals.css';
 import Header from './components/Header';
 import Footer from './components/Footer';
 
 const inter = Inter({ subsets: ['latin'] });
 
-export const metadata = {
-  title: 'Wedding Directory Florida - Find Local Wedding Vendors',
-  description: 'Discover and connect with the best wedding vendors in Florida. Find photographers, venues, caterers, and more for your special day.',
+export const metadata: Metadata = {
+  title: 'Wedding Directory Florida - Find Wedding Vendors in Florida',
+  description: 'Find the best wedding vendors in Florida. Browse by city or category to discover top-rated wedding venues, photographers, planners, and more.',
 };
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
     <html lang="en">
       <body className={inter.className}>
         <div className="min-h-screen flex flex-col">
           <Header />
-          {children}
+          <main className="flex-grow">
+            {children}
+          </main>
           <Footer />
         </div>
       </body>

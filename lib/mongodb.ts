@@ -49,19 +49,17 @@ interface Vendor {
 }
 
 interface GooglePlace {
-  displayName: {
-    text: string;
+  name: string;
+  formatted_address: string;
+  rating?: number;
+  website?: string;
+  geometry?: {
+    location: {
+      lat: number;
+      lng: number;
+    }
   };
-  formattedAddress: string;
-  rating?: {
-    value: number;
-  };
-  websiteUri?: string;
-  location?: {
-    latitude: number;
-    longitude: number;
-  };
-  id: string;
+  place_id: string;
 }
 
 // Cache the database connection for 6 months (in milliseconds)
@@ -121,31 +119,16 @@ async function fetchFromGooglePlaces(city: string, category?: string): Promise<P
   }
 
   try {
-    const searchQuery = `${category || 'wedding venue'} in ${city}, Florida`;
+    const searchQuery = `wedding ${category || 'venue'} in ${city}, Florida`;
     console.log('Searching Google Places for:', searchQuery);
     
     const response = await fetch(
-      'https://places.googleapis.com/v1/places:searchText',
+      `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(searchQuery)}&key=${process.env.GOOGLE_PLACES_API_KEY}`,
       {
-        method: 'POST',
+        method: 'GET',
         headers: {
-          'Content-Type': 'application/json',
-          'X-Goog-Api-Key': process.env.GOOGLE_PLACES_API_KEY,
-          'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.location,places.rating,places.websiteUri'
-        },
-        body: JSON.stringify({
-          textQuery: searchQuery,
-          locationBias: {
-            circle: {
-              center: {
-                latitude: 27.6648,
-                longitude: -81.5158
-              },
-              radius: 500000.0
-            }
-          },
-          maxResultCount: 10
-        })
+          'Accept': 'application/json'
+        }
       }
     );
 
@@ -158,18 +141,21 @@ async function fetchFromGooglePlaces(city: string, category?: string): Promise<P
     const data = await response.json();
     console.log('Google Places API response:', JSON.stringify(data, null, 2));
     
-    if (!data.places || !Array.isArray(data.places)) {
+    if (!data.results || !Array.isArray(data.results)) {
       console.error('Unexpected API response format:', data);
       return [];
     }
 
-    return data.places.map((place: GooglePlace) => ({
-      name: place.displayName.text,
-      address: place.formattedAddress,
-      rating: place.rating?.value,
-      website: place.websiteUri,
-      location: place.location,
-      placeId: place.id
+    return data.results.map((place: GooglePlace) => ({
+      name: place.name,
+      address: place.formatted_address,
+      rating: place.rating,
+      website: place.website,
+      location: place.geometry?.location ? {
+        latitude: place.geometry.location.lat,
+        longitude: place.geometry.location.lng
+      } : undefined,
+      placeId: place.place_id
     }));
   } catch (error) {
     console.error('Error fetching from Google Places:', error);

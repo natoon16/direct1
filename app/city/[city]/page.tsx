@@ -49,8 +49,9 @@ export default async function CityPage({ params, searchParams }: Props) {
   }
 
   // Find the category object based on the search param
-  const category = searchParams.category && searchParams.category.length > 0
-    ? categories.find(c => c.slug === searchParams.category.toLowerCase())
+  const categoryParam = searchParams.category?.toLowerCase() || '';
+  const category = categoryParam.length > 0
+    ? categories.find(c => c.slug === categoryParam)
     : undefined;
 
   console.log('Fetching vendors for:', normalizedCity, category?.slug);

@@ -1,51 +1,91 @@
-import { cities } from '../../data/cities';
-import VendorCard from '../../components/VendorCard';
-import { Place } from '../../lib/places';
+import React from 'react';
+import { getVendors } from '../../../lib/mongodb';
 import { notFound } from 'next/navigation';
+import { cities } from '../../../data/cities';
 
-export async function generateStaticParams() {
-  return cities.map((city) => ({
-    city: city.name.toLowerCase(),
-  }));
+interface Vendor {
+  name: string;
+  address: string;
+  rating?: number;
+  website?: string;
+  photo?: string;
+  category?: string;
 }
 
-export default function CityPage({ params }: { params: { city: string } }) {
-  const city = cities.find(
-    (c) => c.name.toLowerCase() === params.city.toLowerCase()
+interface Props {
+  params: { city: string };
+  searchParams: { category?: string };
+}
+
+export default async function CityPage({ params, searchParams }: Props) {
+  // Validate city exists in our list
+  const cityName = decodeURIComponent(params.city);
+  const normalizedCity = cities.find(
+    c => c.toLowerCase() === cityName.toLowerCase()
   );
 
-  if (!city) {
+  if (!normalizedCity) {
     notFound();
   }
 
-  // Create a sample place that matches the Place interface
-  const sampleVendor: Place = {
-    place_id: "sample-" + city.name.toLowerCase(),
-    name: "Sample Vendor in " + city.name,
-    formatted_address: city.name + ", FL",
-    geometry: {
-      location: {
-        lat: 28.5383,  // Orlando's coordinates as default
-        lng: -81.3792
-      }
-    },
-    rating: 5,
-    user_ratings_total: 25,
-    photos: ["/placeholder-vendor.jpg"],
-    types: ["wedding_vendor"],
-    business_status: "OPERATIONAL"
-  };
+  // Get vendors from MongoDB (which will fetch from Google Places if needed)
+  const vendors = await getVendors(normalizedCity, searchParams.category);
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="mb-8 text-4xl font-bold">Wedding Vendors in {city.name}</h1>
-      <p className="mb-8 text-lg text-gray-600">
-        Find the best wedding vendors and services in {city.name}, Florida. Browse through our curated list of local wedding professionals.
-      </p>
+    <div className="container mx-auto px-4 py-16">
+      <h1 className="text-4xl font-bold mb-4">
+        {searchParams.category 
+          ? `${searchParams.category} in ${normalizedCity}`
+          : `Wedding Vendors in ${normalizedCity}`}
+      </h1>
       
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        <VendorCard vendor={sampleVendor} />
-      </div>
+      <p className="text-lg mb-12">
+        Discover the best wedding vendors in {normalizedCity}, Florida. Our directory features top-rated professionals ready to make your special day perfect.
+      </p>
+
+      {vendors.length === 0 ? (
+        <div className="text-center py-12">
+          <p className="text-xl text-gray-600">
+            No vendors found. Please try a different category or city.
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {vendors.map((vendor: Vendor) => (
+            <div key={vendor.name} className="bg-white rounded-lg shadow-md overflow-hidden">
+              {vendor.photo && (
+                <div className="h-48 w-full bg-gray-200">
+                  <img
+                    src={vendor.photo}
+                    alt={vendor.name}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
+              <div className="p-6">
+                <h2 className="text-xl font-semibold mb-2">{vendor.name}</h2>
+                <p className="text-gray-600 mb-2">{vendor.address}</p>
+                {vendor.rating && (
+                  <div className="flex items-center mb-2">
+                    <span className="text-yellow-400">★</span>
+                    <span className="ml-1">{vendor.rating.toFixed(1)}</span>
+                  </div>
+                )}
+                {vendor.website && (
+                  <a
+                    href={vendor.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-purple-600 hover:text-purple-800"
+                  >
+                    Visit Website
+                  </a>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 } 

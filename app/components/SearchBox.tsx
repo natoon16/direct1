@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { cities } from '@/data/cities';
-import { categories } from '@/data/keywords';
+import { cities } from '../data/cities';
+import { categories } from '../data/keywords';
 
 export default function SearchBox() {
   const router = useRouter();

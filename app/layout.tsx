@@ -20,11 +20,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <Script
-          async
+        <script 
+          async 
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4117137508831098"
           crossOrigin="anonymous"
-          strategy="afterInteractive"
+          data-ad-client="ca-pub-4117137508831098"
         />
       </head>
       <body className={inter.className}>

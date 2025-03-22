@@ -170,10 +170,21 @@ async function fetchFromGooglePlaces(city: string, category?: string): Promise<P
       headers: {
         'Content-Type': 'application/json',
         'X-Goog-Api-Key': process.env.GOOGLE_PLACES_API_KEY,
-        'X-Goog-FieldMask': 'places.displayName,places.formattedAddress,places.rating,places.websiteUri,places.location,places.id'
+        'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.rating,places.websiteUri,places.location,places.types,places.businessStatus'
       },
       body: JSON.stringify({
-        textQuery: searchQuery
+        textQuery: searchQuery,
+        languageCode: "en",
+        maxResultCount: 20,
+        locationBias: {
+          circle: {
+            center: {
+              latitude: 27.6648,  // Central Florida coordinates
+              longitude: -81.5158
+            },
+            radius: 300000.0  // 300km radius to cover most of Florida
+          }
+        }
       })
     });
 
@@ -195,9 +206,9 @@ async function fetchFromGooglePlaces(city: string, category?: string): Promise<P
     
     const vendors = data.places.map((place: any) => {
       const vendor = {
-        name: place.displayName?.text || place.displayName,
-        address: place.formattedAddress,
-        rating: place.rating,
+        name: place.displayName?.text || '',
+        address: place.formattedAddress || '',
+        rating: place.rating?.value,
         website: place.websiteUri,
         location: place.location ? {
           latitude: place.location.latitude,
@@ -207,8 +218,11 @@ async function fetchFromGooglePlaces(city: string, category?: string): Promise<P
       };
       console.log('Processed vendor:', vendor);
       return vendor;
-    });
+    }).filter((vendor: Partial<Vendor>) => 
+      vendor.name && vendor.address // Only include vendors with at least a name and address
+    );
 
+    console.log(`Filtered to ${vendors.length} valid vendors`);
     return vendors;
   } catch (error) {
     console.error('Error in fetchFromGooglePlaces:', error);

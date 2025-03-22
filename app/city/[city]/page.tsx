@@ -99,10 +99,24 @@ export default async function CityPage({ params, searchParams }: Props) {
       </div>
 
       {vendors.length === 0 ? (
-        <div className="text-center py-12">
-          <p className="text-xl text-gray-600">
-            No vendors found. Please try a different category or city.
-          </p>
+        <div className="py-12">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-semibold mb-4">Explore Wedding Vendors in {normalizedCity}</h2>
+            <p className="text-lg text-gray-600 mb-4">
+              Browse our selection of wedding categories below:
+            </p>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {categories.map((cat) => (
+              <Link
+                key={cat.slug}
+                href={`/city/${encodeURIComponent(normalizedCity)}?category=${cat.slug}`}
+                className="p-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow text-center"
+              >
+                <span className="text-purple-600 hover:text-purple-800">{cat.display}</span>
+              </Link>
+            ))}
+          </div>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-6">

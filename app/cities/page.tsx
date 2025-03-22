@@ -1,7 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
-import { cities } from '@/data/cities';
-import { categories } from '@/data/keywords';
+import { cities } from '../../data/cities';
+import { categories } from '../../data/keywords';
 
 // Get top 3 categories for each city
 const topCategories = categories.slice(0, 3);

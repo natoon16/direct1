@@ -1,0 +1,14 @@
+{
+  "navigation": {
+    "home": "Inicio",
+    "cities": "Ciudades",
+    "categories": "Categorías",
+    "about": "Acerca de",
+    "contact": "Contacto"
+  },
+  "common": {
+    "loading": "Cargando...",
+    "error": "Error",
+    "retry": "Reintentar"
+  }
+} 

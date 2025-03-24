@@ -16,22 +16,33 @@ function getLocale(request: NextRequest): string {
 
 export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
-  const pathnameIsMissingLocale = locales.every(
-    (locale) => !pathname.startsWith(`/${locale}/`) && pathname !== `/${locale}`
+  
+  // Skip middleware for static files and API routes
+  if (
+    pathname.startsWith('/_next') ||
+    pathname.startsWith('/api') ||
+    pathname.startsWith('/favicon.ico') ||
+    pathname.startsWith('/site.webmanifest')
+  ) {
+    return NextResponse.next();
+  }
+
+  // Check if the pathname already has a locale
+  const pathnameHasLocale = locales.some(
+    (locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`
   );
 
+  if (pathnameHasLocale) return NextResponse.next();
+
   // Redirect if there is no locale
-  if (pathnameIsMissingLocale) {
-    const locale = getLocale(request);
-    return NextResponse.redirect(
-      new URL(`/${locale}${pathname}`, request.url)
-    );
-  }
+  const locale = getLocale(request);
+  request.nextUrl.pathname = `/${locale}${pathname}`;
+  return NextResponse.redirect(request.nextUrl);
 }
 
 export const config = {
   matcher: [
     // Skip all internal paths (_next)
-    '/((?!_next|api|favicon.ico).*)',
+    '/((?!_next|api|favicon.ico|site.webmanifest).*)',
   ],
 }; 

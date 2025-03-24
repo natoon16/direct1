@@ -114,14 +114,14 @@ const CATEGORIES = [
 ];
 
 export default function CategoryPage({
-  params: { city, category }
+  params: { cityName, category }
 }: {
-  params: { city: string; category: string }
+  params: { cityName: string; category: string }
 }) {
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-6">
-        {category} in {city}
+        {category} in {cityName}
       </h1>
       {/* Vendor list will be added here */}
     </div>
@@ -132,10 +132,10 @@ export default function CategoryPage({
 export async function generateStaticParams() {
   const params = [];
   
-  for (const cityName of CITIES) {
+  for (const city of CITIES) {
     for (const category of CATEGORIES) {
       params.push({
-        city: cityName,
+        cityName: city,
         category: category
       });
     }

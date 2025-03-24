@@ -16,7 +16,7 @@ const languages = [
 export default function LanguageSelector() {
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
-  const pathname = usePathname();
+  const pathname = usePathname() || '/';
   const currentLocale = pathname.split('/')[1] || 'en';
 
   const handleLanguageChange = (langCode: string) => {

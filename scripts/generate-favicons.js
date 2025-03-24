@@ -8,25 +8,31 @@ async function generateFavicons() {
     'icon-32x32.png': 32,
     'icon-192x192.png': 192,
     'icon-512x512.png': 512,
-    'apple-touch-icon.png': 180,
+    'apple-touch-icon.png': 180
   };
 
-  const inputSvg = path.join(__dirname, '../public/favicon.svg');
-  const svgBuffer = await fs.readFile(inputSvg);
+  try {
+    // Read the SVG file
+    const inputSvg = path.join(__dirname, '../public/favicon.svg');
+    const svgBuffer = await fs.readFile(inputSvg);
 
-  for (const [filename, size] of Object.entries(sizes)) {
+    // Generate PNG files
+    for (const [filename, size] of Object.entries(sizes)) {
+      await sharp(svgBuffer)
+        .resize(size, size)
+        .png()
+        .toFile(path.join(__dirname, '../public', filename));
+    }
+
+    // Generate favicon.ico (32x32)
     await sharp(svgBuffer)
-      .resize(size, size)
-      .toFile(path.join(__dirname, '../public', filename));
+      .resize(32, 32)
+      .toFile(path.join(__dirname, '../public/favicon.ico'));
+
+    console.log('Favicon generation completed successfully!');
+  } catch (error) {
+    console.error('Error generating favicons:', error);
   }
-
-  // Generate favicon.ico (includes both 16x16 and 32x32)
-  await sharp(svgBuffer)
-    .resize(32, 32)
-    .toFormat('ico')
-    .toFile(path.join(__dirname, '../public/favicon.ico'));
-
-  console.log('All favicon files generated successfully!');
 }
 
-generateFavicons().catch(console.error); 
+generateFavicons(); 

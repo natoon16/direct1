@@ -19,12 +19,15 @@ export default async function LocaleLayout({
   params: { locale: string };
 }) {
   // Validate that the incoming `locale` parameter is valid
-  if (!locales.includes(locale as any)) notFound();
+  if (!locale || !locales.includes(locale as any)) {
+    notFound();
+  }
 
   let messages;
   try {
     messages = (await import(`../../messages/${locale}.json`)).default;
   } catch (error) {
+    console.error(`Failed to load messages for locale ${locale}:`, error);
     notFound();
   }
 

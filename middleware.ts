@@ -27,6 +27,12 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Handle root route
+  if (pathname === '/') {
+    const locale = getLocale(request);
+    return NextResponse.redirect(new URL(`/${locale}`, request.url));
+  }
+
   // Check if the pathname already has a locale
   const pathnameHasLocale = locales.some(
     (locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`

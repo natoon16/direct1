@@ -1,6 +1,3 @@
-import { useTranslations } from 'next-intl';
-import { getTranslations } from 'next-intl/server';
-
 // Define our known cities and categories
 const CITIES = [
   'jacksonville',
@@ -116,26 +113,17 @@ const CATEGORIES = [
   'rentals'
 ];
 
-export default async function CategoryPage({
-  params: { cityName, category, locale }
+export default function CategoryPage({
+  params: { cityName, category }
 }: {
-  params: { cityName: string; category: string; locale: string }
+  params: { cityName: string; category: string }
 }) {
-  const t = await getTranslations('Categories');
-
-  // Keep proper nouns untranslated
-  const cityNameUntranslated = cityName;
-  const categoryUntranslated = category;
-
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-6">
-        {t('vendors.in', {
-          category: categoryUntranslated,
-          city: cityNameUntranslated
-        })}
+        {category} in {cityName}
       </h1>
-      {/* Vendor list will be added here - vendors' names and details remain untranslated */}
+      {/* Vendor list will be added here */}
     </div>
   );
 }

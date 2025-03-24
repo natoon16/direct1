@@ -10,5 +10,15 @@
     "loading": "Cargando...",
     "error": "Error",
     "retry": "Reintentar"
+  },
+  "NotFound": {
+    "title": "Página No Encontrada",
+    "description": "Lo sentimos, no pudimos encontrar la página que estás buscando.",
+    "backHome": "Volver al Inicio"
+  },
+  "Categories": {
+    "vendors": {
+      "in": "{category} en {city}"
+    }
   }
 } 

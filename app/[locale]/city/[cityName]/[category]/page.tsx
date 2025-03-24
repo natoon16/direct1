@@ -1,6 +1,25 @@
 import { useTranslations } from 'next-intl';
 import { getTranslations } from 'next-intl/server';
 
+// Define our known cities and categories
+const CITIES = ['jupiter', 'boca raton', 'palm beach', 'west palm beach', 'delray beach', 'boynton beach'];
+const CATEGORIES = [
+  'coordinators',
+  'dance-lessons',
+  'alterations',
+  'decor',
+  'djs',
+  'florists',
+  'venues',
+  'catering',
+  'photography',
+  'videography',
+  'makeup',
+  'hair',
+  'transportation',
+  'rentals'
+];
+
 export default async function CategoryPage({
   params: { cityName, category, locale }
 }: {
@@ -8,7 +27,7 @@ export default async function CategoryPage({
 }) {
   const t = await getTranslations('Categories');
 
-  // These values should not be translated as they are proper nouns
+  // Keep proper nouns untranslated
   const cityNameUntranslated = cityName;
   const categoryUntranslated = category;
 
@@ -25,16 +44,12 @@ export default async function CategoryPage({
   );
 }
 
-// Generate static params for the categories we know about
+// Generate static params for all known cities and categories
 export async function generateStaticParams() {
-  // This should match your actual categories and cities
-  const cities = ['jupiter']; // Add more cities as needed
-  const categories = ['coordinators', 'dance-lessons', 'alterations', 'decor'];
-  
   const params = [];
   
-  for (const city of cities) {
-    for (const category of categories) {
+  for (const city of CITIES) {
+    for (const category of CATEGORIES) {
       params.push({
         cityName: city,
         category: category

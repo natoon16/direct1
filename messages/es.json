@@ -18,7 +18,13 @@
   },
   "Categories": {
     "vendors": {
-      "in": "{category} en {city}"
-    }
+      "in": "Proveedores en {city}",
+      "title": "Proveedores de Bodas"
+    },
+    "pageTitle": "Proveedores de Bodas en {city}"
+  },
+  "Hero": {
+    "title": "Encuentra tus Proveedores de Boda Perfectos",
+    "subtitle": "Descubre los mejores profesionales de bodas en {city}"
   }
 } 

@@ -18,7 +18,13 @@
   },
   "Categories": {
     "vendors": {
-      "in": "{category} in {city}"
-    }
+      "in": "Vendors in {city}",
+      "title": "Wedding Vendors"
+    },
+    "pageTitle": "Wedding Vendors in {city}"
+  },
+  "Hero": {
+    "title": "Find Your Perfect Wedding Vendors",
+    "subtitle": "Discover top-rated wedding professionals in {city}"
   }
 } 

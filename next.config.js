@@ -1,3 +1,5 @@
+const withNextIntl = require('next-intl/plugin')();
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
@@ -11,7 +13,8 @@ const nextConfig = {
         hostname: 'lh3.googleusercontent.com',
       },
     ],
+    domains: ['images.unsplash.com'],
   },
 };
 
-module.exports = nextConfig; 
+module.exports = withNextIntl(nextConfig); 

@@ -9,7 +9,6 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@formatjs/intl-localematcher": "^0.6.1",
     "@heroicons/react": "^2.2.0",
     "@types/negotiator": "^0.6.3",
     "mongodb": "^6.3.0",
@@ -17,7 +16,6 @@
     "negotiator": "^1.0.0",
     "next": "^15.2.4",
     "next-google-adsense": "^1.0.13",
-    "next-intl": "^4.0.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "sharp": "^0.33.5",

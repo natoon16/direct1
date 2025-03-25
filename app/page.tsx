@@ -1,4 +1,11 @@
-export default function Home() {
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Wedding Directory Florida - Home',
+  description: 'Find the best wedding vendors in Florida. Browse by city or category to discover top-rated wedding venues, photographers, planners, and more.',
+};
+
+export default function HomePage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-4xl font-bold mb-6">Welcome to Wedding Directory Florida</h1>

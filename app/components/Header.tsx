@@ -3,20 +3,17 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useTranslations } from 'next-intl';
-import LanguageSelector from './LanguageSelector';
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
-  const t = useTranslations('navigation');
 
   const navigation = [
-    { name: t('home'), href: '/' },
-    { name: t('cities'), href: '/cities' },
-    { name: t('categories'), href: '/categories' },
-    { name: t('about'), href: '/about' },
-    { name: t('contact'), href: '/contact' },
+    { name: 'Home', href: '/' },
+    { name: 'Cities', href: '/cities' },
+    { name: 'Categories', href: '/categories' },
+    { name: 'About', href: '/about' },
+    { name: 'Contact', href: '/contact' },
   ];
 
   return (
@@ -44,7 +41,6 @@ export default function Header() {
                 {item.name}
               </Link>
             ))}
-            <LanguageSelector />
           </div>
 
           {/* Mobile menu button */}
@@ -107,9 +103,6 @@ export default function Header() {
                 {item.name}
               </Link>
             ))}
-            <div className="px-3 py-2">
-              <LanguageSelector />
-            </div>
           </div>
         </div>
       </nav>

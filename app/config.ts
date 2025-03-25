@@ -1,2 +1,3 @@
-export const locales = ['en', 'es', 'fr', 'it', 'ar', 'ru', 'zh'] as const;
-export type Locale = typeof locales[number]; 
+// Site configuration
+export const SITE_NAME = 'Wedding Directory Florida';
+export const SITE_URL = 'https://weddingdirectoryflorida.com'; 

@@ -33,7 +33,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <Adsense pid="pub-4117137508831098" />
+        <Adsense pid="ca-pub-4117137508831098" />
       </head>
       <head>
         <link rel="shortcut icon" href="/favicon.ico" />

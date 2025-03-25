@@ -1,145 +1,67 @@
-// Define our known cities and categories
-const CITIES = [
-  'jacksonville',
-  'miami',
-  'tampa',
-  'orlando',
-  'st. petersburg',
-  'hialeah',
-  'port st. lucie',
-  'tallahassee',
-  'cape coral',
-  'fort lauderdale',
-  'pembroke pines',
-  'hollywood',
-  'gainesville',
-  'miramar',
-  'coral springs',
-  'palm bay',
-  'west palm beach',
-  'clearwater',
-  'lakeland',
-  'pompano beach',
-  'miami beach',
-  'davie',
-  'boca raton',
-  'sunrise',
-  'deltona',
-  'plantation',
-  'palm coast',
-  'fort myers',
-  'melbourne',
-  'miami gardens',
-  'largo',
-  'homestead',
-  'boynton beach',
-  'kissimmee',
-  'doral',
-  'north port',
-  'lauderhill',
-  'daytona beach',
-  'tamarac',
-  'weston',
-  'delray beach',
-  'ocala',
-  'port orange',
-  'wellington',
-  'jupiter',
-  'north miami',
-  'palm beach gardens',
-  'margate',
-  'coconut creek',
-  'bradenton',
-  'sanford',
-  'sarasota',
-  'pensacola',
-  'bonita springs',
-  'pinellas park',
-  'coral gables',
-  'winter haven',
-  'titusville',
-  'fort pierce',
-  'winter garden',
-  'altamonte springs',
-  'cutler bay',
-  'north lauderdale',
-  'oakland park',
-  'greenacres',
-  'north miami beach',
-  'ormond beach',
-  'clermont',
-  'lake worth beach',
-  'hallandale beach',
-  'aventura',
-  'plant city',
-  'royal palm beach',
-  'winter springs',
-  'riviera beach',
-  'estero',
-  'dunedin',
-  'lauderdale lakes',
-  'parkland',
-  'cooper city',
-  'panama city',
-  'dania beach',
-  'miami lakes',
-  'new smyrna beach',
-  'tarpon springs',
-  'casselberry',
-  'rockledge',
-  'crestview',
-  'leesburg',
-  'palm springs',
-  'marco island',
-  'haines city',
-  'key west',
-  'west melbourne'
-];
+import VendorCard from '../../../components/VendorCard';
+import { Place } from '../../../lib/places';
+import { cities } from '../../../data/cities';
+import { categories } from '../../../data/keywords';
 
-const CATEGORIES = [
-  'coordinators',
-  'dance-lessons',
-  'alterations',
-  'decor',
-  'djs',
-  'florists',
-  'venues',
-  'catering',
-  'photography',
-  'videography',
-  'makeup',
-  'hair',
-  'transportation',
-  'rentals'
-];
-
-export default function CategoryPage({
-  params: { cityName, category }
-}: {
-  params: { cityName: string; category: string }
-}) {
-  return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">
-        {category} in {cityName}
-      </h1>
-      {/* Vendor list will be added here */}
-    </div>
-  );
-}
-
-// Generate static params for all known cities and categories
 export async function generateStaticParams() {
   const params = [];
-  
-  for (const city of CITIES) {
-    for (const category of CATEGORIES) {
+  for (const cityData of cities) {
+    for (const categoryData of categories) {
       params.push({
-        cityName: city,
-        category: category
+        city: cityData.name.toLowerCase(),
+        category: categoryData.slug.toLowerCase(),
       });
     }
   }
-  
   return params;
+}
+
+export default function CityAndCategoryPage({
+  params,
+}: {
+  params: { city: string; category: string };
+}) {
+  const cityData = cities.find(
+    (c: { name: string }) => c.name.toLowerCase() === params.city.toLowerCase()
+  );
+  const categoryData = categories.find(
+    (c: { slug: string }) => c.slug.toLowerCase() === params.category.toLowerCase()
+  );
+
+  if (!cityData || !categoryData) {
+    return <div>Page not found</div>;
+  }
+
+  // Create a sample place that matches the Place interface
+  const sampleVendor: Place = {
+    place_id: "sample-" + cityData.name.toLowerCase() + "-" + categoryData.slug.toLowerCase(),
+    name: "Sample " + categoryData.title + " Vendor in " + cityData.name,
+    formatted_address: cityData.name + ", FL",
+    geometry: {
+      location: {
+        lat: 0,
+        lng: 0
+      }
+    },
+    rating: 4.5,
+    user_ratings_total: 25,
+    photos: ["/placeholder-vendor.jpg"],
+    types: [categoryData.slug.toLowerCase()],
+    business_status: "OPERATIONAL"
+  };
+
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="mb-8 text-4xl font-bold">
+        {categoryData.title} in {cityData.name}, Florida
+      </h1>
+      <p className="mb-8 text-lg text-gray-600">
+        Find the best {categoryData.title.toLowerCase()} vendors and services for your wedding in {cityData.name}, Florida. Browse through our curated list of local wedding professionals.
+      </p>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <VendorCard vendor={sampleVendor} />
+        {/* More vendor cards will be added here */}
+      </div>
+    </div>
+  );
 } 

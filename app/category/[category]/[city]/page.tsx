@@ -5,14 +5,15 @@ import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import VendorCard from '../../../components/VendorCard';
 
-type Props = {
+interface PageProps {
   params: {
     category: string;
     city: string;
   };
-};
+  searchParams: { [key: string]: string | string[] | undefined };
+}
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   // Validate category and city
   const category = categories.find((c: Category) => c.slug === params.category);
   const cityName = params.city.split('-').map(word => 
@@ -33,7 +34,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function CategoryCityPage({ params }: Props) {
+export default async function CategoryCityPage({ params }: PageProps) {
   // Validate category and city
   const category = categories.find((c: Category) => c.slug === params.category);
   const cityName = params.city.split('-').map(word => 

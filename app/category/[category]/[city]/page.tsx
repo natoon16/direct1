@@ -5,18 +5,18 @@ import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import VendorCard from '../../../components/VendorCard';
 
-interface PageProps {
-  params: {
+type Props = {
+  params: Promise<{
     category: string;
     city: string;
-  };
-  searchParams: { [key: string]: string | string[] | undefined };
+  }>;
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const resolvedParams = await params;
   // Validate category and city
-  const category = categories.find((c: Category) => c.slug === params.category);
-  const cityName = params.city.split('-').map(word => 
+  const category = categories.find((c: Category) => c.slug === resolvedParams.category);
+  const cityName = resolvedParams.city.split('-').map(word => 
     word.charAt(0).toUpperCase() + word.slice(1)
   ).join(' ');
   const city = cities.find((c: City) => c.name.toLowerCase() === cityName.toLowerCase());
@@ -34,10 +34,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
-export default async function CategoryCityPage({ params }: PageProps) {
+export default async function CategoryCityPage({ params }: Props) {
+  const resolvedParams = await params;
   // Validate category and city
-  const category = categories.find((c: Category) => c.slug === params.category);
-  const cityName = params.city.split('-').map(word => 
+  const category = categories.find((c: Category) => c.slug === resolvedParams.category);
+  const cityName = resolvedParams.city.split('-').map(word => 
     word.charAt(0).toUpperCase() + word.slice(1)
   ).join(' ');
   const city = cities.find((c: City) => c.name.toLowerCase() === cityName.toLowerCase());

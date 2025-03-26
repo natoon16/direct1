@@ -50,7 +50,7 @@ export async function searchPlaces(
   // Check cache first
   const cachedResults = await getCachedResults(query);
   if (cachedResults) {
-    return cachedResults;
+    return { places: cachedResults };
   }
 
   try {
@@ -99,7 +99,7 @@ export async function searchPlaces(
     const validPlaces = places.filter((place): place is Place => place !== null);
     await cacheResults(query, validPlaces);
 
-    return validPlaces;
+    return { places: validPlaces };
   } catch (error) {
     console.error('Error searching places:', error);
     throw error;

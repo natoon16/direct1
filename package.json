@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@googlemaps/google-maps-services-js": "^3.4.0",
     "@heroicons/react": "^2.2.0",
     "@types/negotiator": "^0.6.3",
     "mongodb": "^6.3.0",

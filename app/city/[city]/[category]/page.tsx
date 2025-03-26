@@ -1,14 +1,14 @@
 import { cities, City } from '../../../data/cities';
 import { categories, Category } from '../../../data/keywords';
-import { searchPlaces } from '../../../lib/places';
+import { searchPlaces, Place } from '../../../lib/places';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import VendorCard from '../../../components/VendorCard';
 
 type Props = {
   params: Promise<{
-    city: string;
     category: string;
+    city: string;
   }>;
 }
 
@@ -50,7 +50,7 @@ export default async function CityCategoryPage({ params }: Props) {
 
   try {
     // Search for vendors using Google Places API with caching
-    const { places } = await searchPlaces('', cityName, category.name);
+    const { places } = await searchPlaces(cityName, category.name);
 
     return (
       <div className="bg-white">
@@ -69,7 +69,7 @@ export default async function CityCategoryPage({ params }: Props) {
           {/* Results Grid */}
           <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {places.length > 0 ? (
-              places.map((place) => (
+              places.map((place: Place) => (
                 <VendorCard key={place.place_id} vendor={place} />
               ))
             ) : (

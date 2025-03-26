@@ -5,7 +5,11 @@ if (!process.env.MONGODB_URI) {
 }
 
 const uri = process.env.MONGODB_URI;
-const options = {};
+const options = {
+  maxPoolSize: 10,
+  serverSelectionTimeoutMS: 5000,
+  socketTimeoutMS: 45000,
+};
 
 let client;
 let clientPromise: Promise<MongoClient>;
@@ -42,35 +46,56 @@ export interface CacheEntry {
 }
 
 export async function getCachedResults(query: string) {
-  const client = await clientPromise;
-  const db = client.db('wedding-directory');
-  const cache = db.collection('search-cache');
+  try {
+    const client = await clientPromise;
+    const db = client.db('wedding-directory');
+    const cache = db.collection('search-cache');
 
-  const entry = await cache.findOne({ query });
-  if (!entry) return null;
+    const entry = await cache.findOne({ query });
+    if (!entry) return null;
 
-  const now = Date.now();
-  if (now - entry.timestamp > CACHE_DURATION) {
-    await cache.deleteOne({ query });
+    const now = Date.now();
+    if (now - entry.timestamp > CACHE_DURATION) {
+      await cache.deleteOne({ query });
+      return null;
+    }
+
+    return entry.results;
+  } catch (error) {
+    console.error('Error getting cached results:', error);
     return null;
   }
-
-  return entry.results;
 }
 
 export async function cacheResults(query: string, results: any[]) {
-  const client = await clientPromise;
-  const db = client.db('wedding-directory');
-  const cache = db.collection('search-cache');
+  try {
+    const client = await clientPromise;
+    const db = client.db('wedding-directory');
+    const cache = db.collection('search-cache');
 
-  await cache.updateOne(
-    { query },
-    {
-      $set: {
-        results,
-        timestamp: Date.now(),
+    await cache.updateOne(
+      { query },
+      {
+        $set: {
+          results,
+          timestamp: Date.now(),
+        },
       },
-    },
-    { upsert: true }
-  );
+      { upsert: true }
+    );
+  } catch (error) {
+    console.error('Error caching results:', error);
+  }
+}
+
+// Function to check database connection
+export async function checkConnection() {
+  try {
+    const client = await clientPromise;
+    await client.db('wedding-directory').command({ ping: 1 });
+    return { isConnected: true };
+  } catch (error) {
+    console.error('Database connection error:', error);
+    return { isConnected: false, error };
+  }
 } 

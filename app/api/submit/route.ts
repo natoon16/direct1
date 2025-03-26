@@ -1,26 +1,47 @@
-import { connectToDatabase, getConnectionStatus } from '../../lib/mongodb';
+import clientPromise, { checkConnection } from '../../lib/mongodb';
 import { NextResponse } from 'next/server';
-import mongoose from 'mongoose';
 
 export async function POST(request: Request) {
   try {
-    const data = await request.json();
-    
-    // Connect to MongoDB
-    await connectToDatabase();
-    
-    // Check connection status
-    const status = await getConnectionStatus();
-    if (!status.isConnected) {
-      return NextResponse.json({ error: 'Database connection failed' }, { status: 500 });
+    // Check database connection first
+    const connectionStatus = await checkConnection();
+    if (!connectionStatus.isConnected) {
+      console.error('Database connection failed:', connectionStatus.error);
+      return NextResponse.json(
+        { 
+          success: false, 
+          message: 'Database connection failed' 
+        },
+        { status: 503 }
+      );
     }
 
-    // Process the submission
-    // Add your submission logic here
+    const client = await clientPromise;
+    const db = client.db('wedding-directory');
+    const collection = db.collection('submissions');
 
-    return NextResponse.json({ success: true });
+    const data = await request.json();
+    
+    // Add timestamp to the submission
+    const submission = {
+      ...data,
+      timestamp: new Date(),
+    };
+
+    await collection.insertOne(submission);
+
+    return NextResponse.json({ 
+      success: true, 
+      message: 'Submission received successfully' 
+    });
   } catch (error) {
-    console.error('Submission error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    console.error('Error saving submission:', error);
+    return NextResponse.json(
+      { 
+        success: false, 
+        message: 'Failed to save submission' 
+      },
+      { status: 500 }
+    );
   }
 } 

@@ -50,115 +50,125 @@ export default function SearchBar() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="w-full max-w-4xl">
-        <div className="bg-white rounded-lg shadow-lg p-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
-            Find Wedding Vendors in Florida
-          </h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* City Select */}
-            <div className="relative" ref={cityRef}>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Select City
-              </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  value={selectedCity}
-                  onClick={() => setIsCityOpen(true)}
-                  onChange={(e) => {
-                    setCitySearch(e.target.value);
-                    setSelectedCity(e.target.value);
-                    setIsCityOpen(true);
-                  }}
-                  placeholder="Search cities..."
-                  className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                />
-                {isCityOpen && (
-                  <div 
-                    ref={cityDropdownRef}
-                    className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-[300px] overflow-y-auto"
-                  >
-                    {filteredCities.length > 0 ? (
-                      filteredCities.map((city: City) => (
-                        <div
-                          key={city.name}
-                          className="px-4 py-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0"
-                          onClick={() => {
-                            setSelectedCity(city.name);
-                            setIsCityOpen(false);
-                          }}
-                        >
-                          {city.name}
+    <div className="relative bg-white">
+      <div className="absolute inset-0">
+        <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 mix-blend-multiply" />
+        <div className="absolute inset-0 bg-gradient-to-r from-pink-500 to-red-500 mix-blend-multiply" />
+      </div>
+      <div className="relative max-w-7xl mx-auto py-24 px-4 sm:py-32 sm:px-6 lg:px-8">
+        <div className="text-center">
+          <h1 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl">
+            Find Your Perfect Wedding Vendors
+          </h1>
+          <p className="mt-6 max-w-2xl mx-auto text-xl text-white">
+            Discover the best wedding professionals in Florida. From venues to photographers, we've got you covered.
+          </p>
+        </div>
+        <div className="mt-12 max-w-xl mx-auto">
+          <div className="bg-white rounded-lg shadow-xl p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* City Select */}
+              <div className="relative" ref={cityRef}>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Select City
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={selectedCity}
+                    onClick={() => setIsCityOpen(true)}
+                    onChange={(e) => {
+                      setCitySearch(e.target.value);
+                      setSelectedCity(e.target.value);
+                      setIsCityOpen(true);
+                    }}
+                    placeholder="Search cities..."
+                    className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  />
+                  {isCityOpen && (
+                    <div 
+                      ref={cityDropdownRef}
+                      className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-[300px] overflow-y-auto"
+                    >
+                      {filteredCities.length > 0 ? (
+                        filteredCities.map((city: City) => (
+                          <div
+                            key={city.name}
+                            className="px-4 py-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0"
+                            onClick={() => {
+                              setSelectedCity(city.name);
+                              setIsCityOpen(false);
+                            }}
+                          >
+                            {city.name}
+                          </div>
+                        ))
+                      ) : (
+                        <div className="px-4 py-3 text-gray-500">
+                          No cities found
                         </div>
-                      ))
-                    ) : (
-                      <div className="px-4 py-3 text-gray-500">
-                        No cities found
-                      </div>
-                    )}
-                  </div>
-                )}
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Category Select */}
+              <div className="relative" ref={categoryRef}>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Select Category
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={selectedCategory}
+                    onClick={() => setIsCategoryOpen(true)}
+                    onChange={(e) => {
+                      setCategorySearch(e.target.value);
+                      setSelectedCategory(e.target.value);
+                      setIsCategoryOpen(true);
+                    }}
+                    placeholder="Search categories..."
+                    className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  />
+                  {isCategoryOpen && (
+                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-[300px] overflow-y-auto">
+                      {filteredCategories.length > 0 ? (
+                        filteredCategories.map((category: Category) => (
+                          <div
+                            key={category.slug}
+                            className="px-4 py-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0"
+                            onClick={() => {
+                              setSelectedCategory(category.title);
+                              setIsCategoryOpen(false);
+                            }}
+                          >
+                            {category.title}
+                          </div>
+                        ))
+                      ) : (
+                        <div className="px-4 py-3 text-gray-500">
+                          No categories found
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
-            {/* Category Select */}
-            <div className="relative" ref={categoryRef}>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Select Category
-              </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  value={selectedCategory}
-                  onClick={() => setIsCategoryOpen(true)}
-                  onChange={(e) => {
-                    setCategorySearch(e.target.value);
-                    setSelectedCategory(e.target.value);
-                    setIsCategoryOpen(true);
-                  }}
-                  placeholder="Search categories..."
-                  className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                />
-                {isCategoryOpen && (
-                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-[300px] overflow-y-auto">
-                    {filteredCategories.length > 0 ? (
-                      filteredCategories.map((category: Category) => (
-                        <div
-                          key={category.slug}
-                          className="px-4 py-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0"
-                          onClick={() => {
-                            setSelectedCategory(category.title);
-                            setIsCategoryOpen(false);
-                          }}
-                        >
-                          {category.title}
-                        </div>
-                      ))
-                    ) : (
-                      <div className="px-4 py-3 text-gray-500">
-                        No categories found
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
+            <button
+              onClick={handleSearch}
+              disabled={!selectedCity || !selectedCategory}
+              className={`mt-6 w-full py-4 px-4 rounded-md text-white font-medium text-lg ${
+                selectedCity && selectedCategory
+                  ? 'bg-indigo-600 hover:bg-indigo-700'
+                  : 'bg-gray-400 cursor-not-allowed'
+              }`}
+            >
+              Search Vendors
+            </button>
           </div>
-
-          <button
-            onClick={handleSearch}
-            disabled={!selectedCity || !selectedCategory}
-            className={`mt-8 w-full py-4 px-4 rounded-md text-white font-medium text-lg ${
-              selectedCity && selectedCategory
-                ? 'bg-indigo-600 hover:bg-indigo-700'
-                : 'bg-gray-400 cursor-not-allowed'
-            }`}
-          >
-            Search Vendors
-          </button>
         </div>
       </div>
     </div>

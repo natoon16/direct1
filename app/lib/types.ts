@@ -6,7 +6,6 @@ export interface PlaceData {
   website?: string;
   rating?: number;
   reviews?: number;
-  photos?: string[];
   category?: string;
   city?: string;
   state?: string;

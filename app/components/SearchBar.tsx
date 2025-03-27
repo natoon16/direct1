@@ -4,7 +4,8 @@ import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { cities } from '../data/cities';
 import { categories } from '../data/keywords';
-import type { City, Category } from '../data/keywords';
+import type { City } from '../data/cities';
+import type { Category } from '../data/keywords';
 
 export default function SearchBar() {
   const router = useRouter();

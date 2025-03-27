@@ -112,15 +112,15 @@ export async function searchPlaces(category: string, city: string): Promise<Plac
 }
 
 export async function getPlaceDetails(placeId: string): Promise<PlaceData | null> {
-  const query = `place-${placeId}`;
-  
-  // Check cache first
-  const cachedResult = await getCachedResults(query);
-  if (cachedResult.length > 0) {
-    return cachedResult[0];
-  }
-
   try {
+    const query = `place-${placeId}`;
+    
+    // Check cache first
+    const cachedResult = await getCachedResults(query);
+    if (cachedResult.length > 0) {
+      return cachedResult[0];
+    }
+
     const response = await client.placeDetails({
       params: {
         place_id: placeId,

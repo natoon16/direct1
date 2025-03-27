@@ -1,4 +1,6 @@
 import mongoose from 'mongoose';
+import { Place } from './models/Place';
+import { PlaceData } from './types';
 
 if (!process.env.MONGODB_URI) {
   throw new Error('Please define the MONGODB_URI environment variable inside .env.local');
@@ -6,23 +8,60 @@ if (!process.env.MONGODB_URI) {
 
 const MONGODB_URI = process.env.MONGODB_URI;
 
-let isConnected = false;
+let cached = global.mongoose;
 
-async function connectDB(): Promise<typeof mongoose> {
-  if (isConnected) {
-    return mongoose;
+if (!cached) {
+  cached = global.mongoose = { conn: null, promise: null };
+}
+
+async function connectDB() {
+  if (cached.conn) {
+    return cached.conn;
+  }
+
+  if (!cached.promise) {
+    const opts = {
+      bufferCommands: false,
+    };
+
+    cached.promise = mongoose.connect(MONGODB_URI!, opts).then((mongoose) => {
+      return mongoose;
+    });
   }
 
   try {
-    await mongoose.connect(MONGODB_URI!, {
-      bufferCommands: false,
-    });
-    isConnected = true;
-    return mongoose;
-  } catch (error) {
-    console.error('MongoDB connection error:', error);
-    throw error;
+    cached.conn = await cached.promise;
+  } catch (e) {
+    cached.promise = null;
+    throw e;
   }
+
+  return cached.conn;
+}
+
+export async function getCachedResults(query: string): Promise<PlaceData[]> {
+  await connectDB();
+  const sixMonthsAgo = new Date();
+  sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+  
+  const places = await Place.find({
+    $or: [
+      { category: query.toLowerCase() },
+      { city: query.toLowerCase() }
+    ],
+    last_updated: { $gte: sixMonthsAgo }
+  });
+  
+  return places;
+}
+
+export async function cacheResults(query: string, place: PlaceData): Promise<void> {
+  await connectDB();
+  await Place.findOneAndUpdate(
+    { place_id: place.place_id },
+    place,
+    { upsert: true }
+  );
 }
 
 export default connectDB;

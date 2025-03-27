@@ -92,14 +92,20 @@ export function convertPlaceToVendor(place: PlaceData, category: string, city: s
 
 export async function getPlaceDetails(placeId: string): Promise<PlaceData | null> {
   try {
-    const response = await fetch(`https://places.googleapis.com/v1/places/${placeId}`, {
+    const response = await fetch('/api/places', {
+      method: 'POST',
       headers: {
-        'X-Goog-Api-Key': GOOGLE_PLACES_API_KEY || '',
-        'X-Goog-FieldMask': 'id,displayName,formattedAddress,phoneNumber,websiteUri,rating,userRatingCount,location'
-      }
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ placeId })
     });
 
     if (!response.ok) {
+      const errorData = await response.json();
+      console.error('API Error:', {
+        status: response.status,
+        error: errorData
+      });
       throw new Error('Failed to fetch place details');
     }
 

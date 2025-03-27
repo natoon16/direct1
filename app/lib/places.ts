@@ -1,6 +1,7 @@
 import { Client, PlaceDetailsResponse } from '@googlemaps/google-maps-services-js';
 import { Place } from './models/Place';
 import connectDB, { getCachedResults, cacheResults } from './mongodb';
+import { PlaceData } from './types';
 
 const client = new Client({});
 
@@ -20,23 +21,7 @@ type PlaceFields = (typeof PLACE_DETAIL_FIELDS)[number];
 // Convert readonly array to mutable array
 const placeDetailFields: PlaceFields[] = [...PLACE_DETAIL_FIELDS];
 
-export interface PlaceData {
-  place_id: string;
-  name: string;
-  address: string;
-  phone?: string;
-  website?: string;
-  rating: number;
-  reviews: number;
-  photos?: string[];
-  category: string;
-  city: string;
-  state: string;
-  country: string;
-  lat: number;
-  lng: number;
-  last_updated: Date;
-}
+export type { PlaceData };
 
 export async function searchPlaces(category: string, city: string): Promise<PlaceData[]> {
   await connectDB();

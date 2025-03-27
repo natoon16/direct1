@@ -3,8 +3,6 @@ import { categories, Category } from '../../../data/keywords';
 import { searchPlaces, PlaceData } from '../../../lib/places';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
-import Image from 'next/image';
-import VendorCard from '../../../components/VendorCard';
 
 interface Props {
   params: Promise<{
@@ -52,17 +50,6 @@ export default async function CategoryCityPage({ params }: Props) {
                 key={place.place_id}
                 className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200 hover:shadow-xl transition-shadow duration-300"
               >
-                {place.photos && place.photos.length > 0 && (
-                  <div className="relative h-48 w-full">
-                    <Image
-                      src={`https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photo_reference=${place.photos[0]}&key=${process.env.GOOGLE_PLACES_API_KEY}`}
-                      alt={place.name}
-                      fill
-                      className="object-cover"
-                      unoptimized
-                    />
-                  </div>
-                )}
                 <div className="p-6">
                   <h3 className="text-xl font-semibold text-gray-900 mb-2">
                     {place.name}

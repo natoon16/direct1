@@ -1,6 +1,7 @@
 import { Client } from '@googlemaps/google-maps-services-js';
 import { Place } from './models/Place';
-import { connectDB } from './mongodb';
+import { getCachedResults, cacheResults } from './mongodb';
+import { PlaceData } from './types';
 
 const client = new Client({});
 
@@ -17,41 +18,12 @@ const PLACE_DETAIL_FIELDS = [
 
 type PlaceFields = typeof PLACE_DETAIL_FIELDS[number];
 
-export interface PlaceData {
-  place_id: string;
-  name: string;
-  address: string;
-  phone?: string;
-  website?: string;
-  rating?: number;
-  reviews?: number;
-  photos?: string[];
-  category: string;
-  city: string;
-  state: string;
-  country: string;
-  lat: number;
-  lng: number;
-  last_updated: Date;
-}
-
 export async function searchPlaces(category: string, city: string): Promise<PlaceData[]> {
   try {
     console.log('Searching places with:', { category, city });
     
-    // Connect to MongoDB
-    await connectDB();
-    
     // Check for cached results
-    const sixMonthsAgo = new Date();
-    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-    
-    const cachedPlaces = await Place.find({
-      category: category.toLowerCase(),
-      city: city.toLowerCase(),
-      last_updated: { $gte: sixMonthsAgo }
-    });
-    
+    const cachedPlaces = await getCachedResults(`${category}-${city}`);
     console.log(`Found ${cachedPlaces.length} cached places`);
     
     if (cachedPlaces.length > 0) {
@@ -67,7 +39,7 @@ export async function searchPlaces(category: string, city: string): Promise<Plac
         query,
         key: process.env.GOOGLE_PLACES_API_KEY!,
         region: 'us',
-        type: 'establishment' as const,
+        type: 'establishment' as any, // Type assertion needed due to API type mismatch
       },
     });
 
@@ -86,6 +58,11 @@ export async function searchPlaces(category: string, city: string): Promise<Plac
     
     for (const place of places) {
       try {
+        if (!place.place_id || !place.geometry?.location) {
+          console.log('Skipping place without required data:', place);
+          continue;
+        }
+
         const details = await client.placeDetails({
           params: {
             place_id: place.place_id,
@@ -96,15 +73,15 @@ export async function searchPlaces(category: string, city: string): Promise<Plac
 
         const placeData: PlaceData = {
           place_id: place.place_id,
-          name: place.name,
-          address: place.formatted_address,
-          phone: details.data.result.formatted_phone_number,
-          website: details.data.result.website,
-          rating: place.rating,
-          reviews: place.user_ratings_total,
+          name: place.name || '',
+          address: place.formatted_address || '',
+          phone: details.data.result.formatted_phone_number || '',
+          website: details.data.result.website || '',
+          rating: place.rating || 0,
+          reviews: place.user_ratings_total || 0,
           photos: details.data.result.photos?.map(photo => 
             `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photo_reference=${photo.photo_reference}&key=${process.env.GOOGLE_PLACES_API_KEY}`
-          ),
+          ) || [],
           category: category.toLowerCase(),
           city: city.toLowerCase(),
           state: 'florida',
@@ -115,11 +92,7 @@ export async function searchPlaces(category: string, city: string): Promise<Plac
         };
 
         // Cache the place data
-        await Place.findOneAndUpdate(
-          { place_id: place.place_id },
-          placeData,
-          { upsert: true }
-        );
+        await cacheResults(`${category}-${city}`, placeData);
 
         detailedPlaces.push(placeData);
       } catch (error) {
@@ -141,7 +114,7 @@ export async function getPlaceDetails(placeId: string): Promise<PlaceData | null
   
   // Check cache first
   const cachedResult = await getCachedResults(query);
-  if (cachedResult) {
+  if (cachedResult.length > 0) {
     return cachedResult[0];
   }
 
@@ -149,7 +122,7 @@ export async function getPlaceDetails(placeId: string): Promise<PlaceData | null
     const response = await client.placeDetails({
       params: {
         place_id: placeId,
-        fields: PLACE_DETAIL_FIELDS as PlaceFields[],
+        fields: [...PLACE_DETAIL_FIELDS],
         key: process.env.GOOGLE_MAPS_API_KEY!,
       },
     });
@@ -178,7 +151,7 @@ export async function getPlaceDetails(placeId: string): Promise<PlaceData | null
     };
 
     // Cache the result
-    await cacheResults(query, [placeData]);
+    await cacheResults(query, placeData);
 
     return placeData;
   } catch (error) {

@@ -4,8 +4,8 @@ export interface PlaceData {
   address: string;
   phone?: string;
   website?: string;
-  rating: number;
-  reviews: number;
+  rating?: number;
+  reviews?: number;
   photos?: string[];
   category: string;
   city: string;

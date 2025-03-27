@@ -98,7 +98,7 @@ export default async function CategoryCityPage({ params }: Props) {
                         <svg
                           key={i}
                           className={`h-5 w-5 ${
-                            i < Math.round(place.rating)
+                            i < Math.round(place.rating || 0)
                               ? 'text-yellow-400'
                               : 'text-gray-300'
                           }`}
@@ -109,7 +109,7 @@ export default async function CategoryCityPage({ params }: Props) {
                         </svg>
                       ))}
                       <span className="ml-2 text-gray-600">
-                        ({place.reviews} reviews)
+                        ({place.reviews || 0} reviews)
                       </span>
                     </div>
                   </div>

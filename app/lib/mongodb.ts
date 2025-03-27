@@ -1,27 +1,16 @@
 import mongoose from 'mongoose';
-import { Place } from './models/Place';
 import { PlaceData } from './types';
-
-if (!process.env.MONGODB_URI) {
-  throw new Error('Please define the MONGODB_URI environment variable inside .env.local');
-}
 
 const MONGODB_URI = process.env.MONGODB_URI;
 
-interface MongooseCache {
-  conn: typeof mongoose | null;
-  promise: Promise<typeof mongoose> | null;
+if (!MONGODB_URI) {
+  throw new Error('Please define the MONGODB_URI environment variable inside .env.local');
 }
 
-declare global {
-  // eslint-disable-next-line no-var
-  var mongoose: MongooseCache | undefined;
-}
-
-const cached: MongooseCache = global.mongoose || { conn: null, promise: null };
+let cached = global.mongoose;
 
 if (!cached) {
-  global.mongoose = { conn: null, promise: null };
+  cached = global.mongoose = { conn: null, promise: null };
 }
 
 async function connectDB() {
@@ -49,62 +38,66 @@ async function connectDB() {
   return cached.conn;
 }
 
-// Cache duration in milliseconds (6 months)
-export const CACHE_DURATION = 6 * 30 * 24 * 60 * 60 * 1000;
+// Define the Place schema
+const PlaceSchema = new mongoose.Schema({
+  id: String,
+  name: String,
+  address: String,
+  phone: String,
+  website: String,
+  rating: Number,
+  reviews: Number,
+  category: String,
+  city: String,
+  state: String,
+  country: String,
+  lat: Number,
+  lng: Number,
+  last_updated: Date
+});
 
-export interface CacheEntry {
-  query: string;
-  results: any[];
-  timestamp: number;
-}
+// Create the Place model
+const Place = mongoose.models.Place || mongoose.model('Place', PlaceSchema);
 
-export async function getCachedResults(query: string): Promise<PlaceData[]> {
-  try {
-    await connectDB();
-    const sixMonthsAgo = new Date();
-    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-    
-    const places = await Place.find({
-      $or: [
-        { category: query.toLowerCase() },
-        { city: query.toLowerCase() }
-      ],
-      last_updated: { $gte: sixMonthsAgo }
-    });
-    
-    return places;
-  } catch (error) {
-    console.error('Error getting cached results:', error);
-    return [];
-  }
-}
-
-export async function cacheResults(query: string, place: PlaceData): Promise<void> {
-  try {
-    await connectDB();
+export async function cacheResults(query: string, results: PlaceData[]) {
+  await connectDB();
+  
+  for (const place of results) {
     await Place.findOneAndUpdate(
-      { place_id: place.place_id },
+      { id: place.id },
       place,
       { upsert: true }
     );
-  } catch (error) {
-    console.error('Error caching results:', error);
   }
 }
 
-// Function to check database connection
-export async function checkConnection() {
-  try {
-    const mongoose = await connectDB();
-    const db = mongoose.connection.db;
-    if (!db) throw new Error('Database not connected');
-    
-    await db.command({ ping: 1 });
-    return { isConnected: true };
-  } catch (error) {
-    console.error('Database connection error:', error);
-    return { isConnected: false, error };
-  }
+export async function getCachedResults(query: string): Promise<PlaceData[]> {
+  await connectDB();
+  
+  const places = await Place.find({
+    $or: [
+      { name: { $regex: query, $options: 'i' } },
+      { category: { $regex: query, $options: 'i' } },
+      { city: { $regex: query, $options: 'i' } }
+    ]
+  });
+
+  return places.map(place => ({
+    id: place.id,
+    name: place.name,
+    address: place.address,
+    phone: place.phone,
+    website: place.website,
+    rating: place.rating,
+    reviews: place.reviews,
+    category: place.category,
+    city: place.city,
+    state: place.state,
+    country: place.country,
+    lat: place.lat,
+    lng: place.lng,
+    last_updated: place.last_updated
+  }));
 }
 
 export default connectDB; 

@@ -89,7 +89,7 @@ export default function SearchBar() {
             {isCityOpen && (
               <div 
                 ref={cityDropdownRef}
-                className="absolute z-10 w-full mt-2 bg-white border border-gray-200 rounded-xl shadow-xl max-h-[400px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100"
+                className="absolute z-10 w-full mt-2 bg-white border border-gray-200 rounded-xl shadow-xl max-h-[400px] overflow-y-auto custom-scrollbar"
               >
                 {filteredCities.length > 0 ? (
                   filteredCities.map((city: City) => (
@@ -131,7 +131,7 @@ export default function SearchBar() {
               className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm"
             />
             {isCategoryOpen && (
-              <div className="absolute z-10 w-full mt-2 bg-white border border-gray-200 rounded-xl shadow-xl max-h-[400px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
+              <div className="absolute z-10 w-full mt-2 bg-white border border-gray-200 rounded-xl shadow-xl max-h-[400px] overflow-y-auto custom-scrollbar">
                 {filteredCategories.length > 0 ? (
                   filteredCategories.map((category: Category) => (
                     <div

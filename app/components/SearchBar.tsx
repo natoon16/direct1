@@ -60,7 +60,7 @@ export default function SearchBar() {
     if (selectedCity && selectedCategory) {
       const citySlug = selectedCity.toLowerCase().replace(/\s+/g, '-');
       const categorySlug = selectedCategory.toLowerCase().replace(/\s+/g, '-');
-      router.push(`/category/${categorySlug}/${citySlug}`);
+      router.push(`/city/${citySlug}/${categorySlug}`);
     }
   };
 
@@ -138,7 +138,7 @@ export default function SearchBar() {
                       key={category.slug}
                       className="px-4 py-3 hover:bg-indigo-50 cursor-pointer border-b border-gray-100 last:border-b-0"
                       onClick={() => {
-                        setSelectedCategory(category.title);
+                        setSelectedCategory(category.slug);
                         setCategorySearch('');
                         setIsCategoryOpen(false);
                       }}

@@ -41,7 +41,7 @@ export default async function CategoryCityPage({ params }: Props) {
   // Validate category and city
   const validCategory = categories.find(
     (c: Category) => c.slug.toLowerCase() === category.toLowerCase() ||
-                    c.title.toLowerCase() === formattedCategory.toLowerCase()
+                    c.title.toLowerCase().replace(/\s+/g, '-') === category.toLowerCase()
   );
 
   const validCity = cities.find(
@@ -52,7 +52,9 @@ export default async function CategoryCityPage({ params }: Props) {
     categoryValid: !!validCategory,
     cityValid: !!validCity,
     foundCategory: validCategory?.title,
-    foundCity: validCity?.name
+    foundCity: validCity?.name,
+    searchCategory: category,
+    searchCity: formattedCity
   });
 
   if (!validCategory || !validCity) {

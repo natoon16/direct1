@@ -17,7 +17,7 @@ export default function CitiesPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {cities.map((city) => (
           <div key={city} className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
-            <Link href={`/city/${city.toLowerCase()}`}>
+            <Link href={`/city/${city.toLowerCase().replace(/\s+/g, '-')}`}>
               <h2 className="text-2xl font-semibold mb-4 text-purple-600 hover:text-purple-800">
                 {city}
               </h2>
@@ -27,7 +27,7 @@ export default function CitiesPage() {
               {topCategories.map((category) => (
                 <Link 
                   key={`${city}-${category}`}
-                  href={`/city/${city.toLowerCase()}?category=${category.toLowerCase()}`}
+                  href={`/city/${city.toLowerCase().replace(/\s+/g, '-')}/${category.toLowerCase().replace(/\s+/g, '-')}`}
                   className="block text-gray-600 hover:text-purple-600 transition-colors"
                 >
                   {category} in {city}

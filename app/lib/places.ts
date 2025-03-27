@@ -1,7 +1,6 @@
-import { Client, PlaceDetailsResponse } from '@googlemaps/google-maps-services-js';
+import { Client } from '@googlemaps/google-maps-services-js';
 import { Place } from './models/Place';
-import connectDB, { getCachedResults, cacheResults } from './mongodb';
-import { PlaceData } from './types';
+import { connectDB } from './mongodb';
 
 const client = new Client({});
 
@@ -16,101 +15,121 @@ const PLACE_DETAIL_FIELDS = [
   'formatted_address',
 ] as const;
 
-type PlaceFields = (typeof PLACE_DETAIL_FIELDS)[number];
+type PlaceFields = typeof PLACE_DETAIL_FIELDS[number];
 
-// Convert readonly array to mutable array
-const placeDetailFields: PlaceFields[] = [...PLACE_DETAIL_FIELDS];
-
-export type { PlaceData };
+export interface PlaceData {
+  place_id: string;
+  name: string;
+  address: string;
+  phone?: string;
+  website?: string;
+  rating?: number;
+  reviews?: number;
+  photos?: string[];
+  category: string;
+  city: string;
+  state: string;
+  country: string;
+  lat: number;
+  lng: number;
+  last_updated: Date;
+}
 
 export async function searchPlaces(category: string, city: string): Promise<PlaceData[]> {
-  console.log('Searching for:', { category, city });
-  
-  await connectDB();
-
-  // Check cache first
-  const cachedPlaces = await Place.find({
-    category: category.toLowerCase(),
-    city: city.toLowerCase(),
-    last_updated: { $gt: new Date(Date.now() - 6 * 30 * 24 * 60 * 60 * 1000) } // 6 months
-  }).exec();
-
-  console.log('Cached places found:', cachedPlaces.length);
-
-  if (cachedPlaces.length > 0) {
-    return cachedPlaces;
-  }
-
-  // If not in cache, search using Google Places API
   try {
-    // Modify the query to be more flexible
-    const query = `${category} wedding vendor ${city} FL`;
-    console.log('Google Places API query:', query);
+    console.log('Searching places with:', { category, city });
+    
+    // Connect to MongoDB
+    await connectDB();
+    
+    // Check for cached results
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+    
+    const cachedPlaces = await Place.find({
+      category: category.toLowerCase(),
+      city: city.toLowerCase(),
+      last_updated: { $gte: sixMonthsAgo }
+    });
+    
+    console.log(`Found ${cachedPlaces.length} cached places`);
+    
+    if (cachedPlaces.length > 0) {
+      return cachedPlaces;
+    }
 
+    // If no cached results, search Google Places API
+    const query = `${category} wedding vendor ${city} FL`;
+    console.log('Searching Google Places API with query:', query);
+    
     const response = await client.textSearch({
       params: {
         query,
         key: process.env.GOOGLE_PLACES_API_KEY!,
         region: 'us',
-        type: 'establishment', // Add this to focus on businesses
+        type: 'establishment' as const,
       },
     });
 
-    console.log('Google Places API response status:', response.data.status);
-    console.log('Results found:', response.data.results?.length || 0);
-
-    if (response.data.status === 'OK' && response.data.results) {
-      const places = await Promise.all(
-        response.data.results.map(async (result) => {
-          if (!result.place_id || !result.geometry?.location) {
-            return null;
-          }
-
-          // Get place details for additional information
-          const detailsResponse = await client.placeDetails({
-            params: {
-              place_id: result.place_id,
-              key: process.env.GOOGLE_PLACES_API_KEY!,
-              fields: placeDetailFields,
-            },
-          });
-
-          const placeData: PlaceData = {
-            place_id: result.place_id,
-            name: result.name || '',
-            address: result.formatted_address || '',
-            phone: detailsResponse.data.result?.formatted_phone_number || '',
-            website: detailsResponse.data.result?.website || '',
-            rating: result.rating || 0,
-            reviews: result.user_ratings_total || 0,
-            photos: result.photos?.map(photo => photo.photo_reference) || [],
-            category: category.toLowerCase(),
-            city: city.toLowerCase(),
-            state: 'Florida',
-            country: 'USA',
-            lat: result.geometry.location.lat,
-            lng: result.geometry.location.lng,
-            last_updated: new Date(),
-          };
-
-          // Cache the place data
-          await Place.findOneAndUpdate(
-            { place_id: placeData.place_id },
-            placeData,
-            { upsert: true, new: true }
-          );
-
-          return placeData;
-        })
-      );
-
-      const filteredPlaces = places.filter((place): place is PlaceData => place !== null);
-      console.log('Final places count:', filteredPlaces.length);
-      return filteredPlaces;
+    console.log('Google Places API response status:', response.status);
+    
+    if (response.status !== 200) {
+      console.error('Google Places API error:', response.data);
+      return [];
     }
 
-    console.log('No results found or API error');
-    return [];
+    const places = response.data.results;
+    console.log(`Found ${places.length} places from Google Places API`);
+
+    // Get detailed information for each place
+    const detailedPlaces: PlaceData[] = [];
+    
+    for (const place of places) {
+      try {
+        const details = await client.placeDetails({
+          params: {
+            place_id: place.place_id,
+            fields: ['name', 'formatted_address', 'formatted_phone_number', 'website', 'rating', 'user_ratings_total', 'photos'],
+            key: process.env.GOOGLE_PLACES_API_KEY!,
+          },
+        });
+
+        const placeData: PlaceData = {
+          place_id: place.place_id,
+          name: place.name,
+          address: place.formatted_address,
+          phone: details.data.result.formatted_phone_number,
+          website: details.data.result.website,
+          rating: place.rating,
+          reviews: place.user_ratings_total,
+          photos: details.data.result.photos?.map(photo => 
+            `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photo_reference=${photo.photo_reference}&key=${process.env.GOOGLE_PLACES_API_KEY}`
+          ),
+          category: category.toLowerCase(),
+          city: city.toLowerCase(),
+          state: 'florida',
+          country: 'united states',
+          lat: place.geometry.location.lat,
+          lng: place.geometry.location.lng,
+          last_updated: new Date(),
+        };
+
+        // Cache the place data
+        await Place.findOneAndUpdate(
+          { place_id: place.place_id },
+          placeData,
+          { upsert: true }
+        );
+
+        detailedPlaces.push(placeData);
+      } catch (error) {
+        console.error('Error getting place details:', error);
+        continue;
+      }
+    }
+
+    console.log(`Successfully processed ${detailedPlaces.length} places`);
+    return detailedPlaces;
   } catch (error) {
     console.error('Error searching places:', error);
     return [];

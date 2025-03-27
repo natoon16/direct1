@@ -7,54 +7,80 @@ import { categories } from '../data/keywords';
 import type { City } from '../data/cities';
 import type { Category } from '../data/keywords';
 
+// Define major cities (top 10 most populous cities in Florida)
+const MAJOR_CITIES = [
+  'Jacksonville',
+  'Miami',
+  'Tampa',
+  'Orlando',
+  'St. Petersburg',
+  'Hialeah',
+  'Tallahassee',
+  'Fort Lauderdale',
+  'Port St. Lucie',
+  'Cape Coral'
+];
+
+// Define popular categories (top 5 most searched categories)
+const POPULAR_CATEGORIES = [
+  'Wedding Venues',
+  'Wedding Photographers',
+  'Wedding Catering',
+  'Wedding DJs',
+  'Wedding Transportation'
+];
+
 export default function SearchBar() {
   const router = useRouter();
   const [selectedCity, setSelectedCity] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [citySearch, setCitySearch] = useState('');
   const [categorySearch, setCategorySearch] = useState('');
-  const [isCityOpen, setIsCityOpen] = useState(false);
-  const [isCategoryOpen, setIsCategoryOpen] = useState(false);
-
-  const cityRef = useRef<HTMLDivElement>(null);
-  const categoryRef = useRef<HTMLDivElement>(null);
+  const [showCityDropdown, setShowCityDropdown] = useState(false);
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const cityDropdownRef = useRef<HTMLDivElement>(null);
-  const cityInputRef = useRef<HTMLInputElement>(null);
+  const categoryDropdownRef = useRef<HTMLDivElement>(null);
 
-  // Filter cities and categories based on search input
+  // Filter cities based on search
   const filteredCities = cities
-    .filter((city: City) => 
-      city.name.toLowerCase().includes(citySearch.toLowerCase())
-    )
-    .sort((a, b) => a.name.localeCompare(b.name)); // Sort cities alphabetically
+    .filter(city => city.name.toLowerCase().includes(citySearch.toLowerCase()))
+    .sort((a, b) => {
+      // Sort major cities first
+      const aIsMajor = MAJOR_CITIES.includes(a.name);
+      const bIsMajor = MAJOR_CITIES.includes(b.name);
+      if (aIsMajor && !bIsMajor) return -1;
+      if (!aIsMajor && bIsMajor) return 1;
+      // Then sort alphabetically
+      return a.name.localeCompare(b.name);
+    });
 
+  // Filter categories based on search
   const filteredCategories = categories
-    .filter((category: Category) => 
-      category.title.toLowerCase().includes(categorySearch.toLowerCase())
-    )
-    .sort((a, b) => a.title.localeCompare(b.title)); // Sort categories alphabetically
+    .filter(category => category.title.toLowerCase().includes(categorySearch.toLowerCase()))
+    .sort((a, b) => {
+      // Sort popular categories first
+      const aIsPopular = POPULAR_CATEGORIES.includes(a.title);
+      const bIsPopular = POPULAR_CATEGORIES.includes(b.title);
+      if (aIsPopular && !bIsPopular) return -1;
+      if (!aIsPopular && bIsPopular) return 1;
+      // Then sort alphabetically
+      return a.title.localeCompare(b.title);
+    });
 
-  // Handle click outside to close dropdowns
+  // Handle clicks outside dropdowns
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (cityRef.current && !cityRef.current.contains(event.target as Node)) {
-        setIsCityOpen(false);
+    function handleClickOutside(event: MouseEvent) {
+      if (cityDropdownRef.current && !cityDropdownRef.current.contains(event.target as Node)) {
+        setShowCityDropdown(false);
       }
-      if (categoryRef.current && !categoryRef.current.contains(event.target as Node)) {
-        setIsCategoryOpen(false);
+      if (categoryDropdownRef.current && !categoryDropdownRef.current.contains(event.target as Node)) {
+        setShowCategoryDropdown(false);
       }
-    };
+    }
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
-
-  // Focus city input when dropdown opens
-  useEffect(() => {
-    if (isCityOpen && cityInputRef.current) {
-      cityInputRef.current.focus();
-    }
-  }, [isCityOpen]);
 
   const handleSearch = () => {
     if (selectedCity && selectedCategory) {
@@ -66,108 +92,84 @@ export default function SearchBar() {
 
   return (
     <div className="w-full max-w-4xl mx-auto">
-      <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-2xl p-8 border border-white/20">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* City Selection */}
-          <div ref={cityRef} className="relative">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Select City
-            </label>
-            <input
-              ref={cityInputRef}
-              type="text"
-              value={selectedCity}
-              onChange={(e) => {
-                setSelectedCity(e.target.value);
-                setCitySearch(e.target.value);
-                setIsCityOpen(true);
-              }}
-              onFocus={() => setIsCityOpen(true)}
-              placeholder="Search from 100+ Florida cities..."
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm"
-            />
-            {isCityOpen && (
-              <div 
-                ref={cityDropdownRef}
-                className="absolute z-10 w-full mt-2 bg-white border border-gray-200 rounded-xl shadow-xl max-h-[400px] overflow-y-auto custom-scrollbar"
-              >
-                {filteredCities.length > 0 ? (
-                  filteredCities.map((city: City) => (
-                    <div
-                      key={city.name}
-                      className="px-4 py-3 hover:bg-indigo-50 cursor-pointer flex items-center justify-between border-b border-gray-100 last:border-b-0"
-                      onClick={() => {
-                        setSelectedCity(city.name);
-                        setCitySearch('');
-                        setIsCityOpen(false);
-                      }}
-                    >
-                      <span className="font-medium">{city.name}</span>
-                      <span className="text-sm text-gray-500">{city.county} County</span>
-                    </div>
-                  ))
-                ) : (
-                  <div className="px-4 py-3 text-gray-500">No cities found</div>
-                )}
+      <div className="flex flex-col md:flex-row gap-4">
+        <div className="flex-1 relative" ref={cityDropdownRef}>
+          <input
+            type="text"
+            placeholder="Select a city"
+            value={selectedCity}
+            onChange={(e) => {
+              setSelectedCity(e.target.value);
+              setCitySearch(e.target.value);
+              setShowCityDropdown(true);
+            }}
+            onFocus={() => setShowCityDropdown(true)}
+            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+          />
+          {showCityDropdown && (
+            <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+              <div className="p-2">
+                {filteredCities.map((city) => (
+                  <div
+                    key={city.name}
+                    className={`px-4 py-2 cursor-pointer hover:bg-gray-100 rounded-md ${
+                      MAJOR_CITIES.includes(city.name) ? 'font-semibold text-indigo-600' : ''
+                    }`}
+                    onClick={() => {
+                      setSelectedCity(city.name);
+                      setShowCityDropdown(false);
+                    }}
+                  >
+                    {city.name}
+                  </div>
+                ))}
               </div>
-            )}
-          </div>
-
-          {/* Category Selection */}
-          <div ref={categoryRef} className="relative">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Select Category
-            </label>
-            <input
-              type="text"
-              value={selectedCategory}
-              onChange={(e) => {
-                setSelectedCategory(e.target.value);
-                setCategorySearch(e.target.value);
-                setIsCategoryOpen(true);
-              }}
-              onFocus={() => setIsCategoryOpen(true)}
-              placeholder="Search from 50+ vendor categories..."
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm"
-            />
-            {isCategoryOpen && (
-              <div className="absolute z-10 w-full mt-2 bg-white border border-gray-200 rounded-xl shadow-xl max-h-[400px] overflow-y-auto custom-scrollbar">
-                {filteredCategories.length > 0 ? (
-                  filteredCategories.map((category: Category) => (
-                    <div
-                      key={category.slug}
-                      className="px-4 py-3 hover:bg-indigo-50 cursor-pointer border-b border-gray-100 last:border-b-0"
-                      onClick={() => {
-                        setSelectedCategory(category.slug);
-                        setCategorySearch('');
-                        setIsCategoryOpen(false);
-                      }}
-                    >
-                      {category.title}
-                    </div>
-                  ))
-                ) : (
-                  <div className="px-4 py-3 text-gray-500">No categories found</div>
-                )}
-              </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
 
-        {/* Search Button */}
-        <div className="mt-8 text-center">
-          <button
-            onClick={handleSearch}
-            disabled={!selectedCity || !selectedCategory}
-            className={`px-10 py-3 rounded-xl text-white font-medium text-lg transition-all duration-200 ${
-              selectedCity && selectedCategory
-                ? 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-xl'
-                : 'bg-gray-400 cursor-not-allowed'
-            }`}
-          >
-            Search Vendors
-          </button>
+        <div className="flex-1 relative" ref={categoryDropdownRef}>
+          <input
+            type="text"
+            placeholder="Select a category"
+            value={selectedCategory}
+            onChange={(e) => {
+              setSelectedCategory(e.target.value);
+              setCategorySearch(e.target.value);
+              setShowCategoryDropdown(true);
+            }}
+            onFocus={() => setShowCategoryDropdown(true)}
+            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+          />
+          {showCategoryDropdown && (
+            <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+              <div className="p-2">
+                {filteredCategories.map((category) => (
+                  <div
+                    key={category.slug}
+                    className={`px-4 py-2 cursor-pointer hover:bg-gray-100 rounded-md ${
+                      POPULAR_CATEGORIES.includes(category.title) ? 'font-semibold text-indigo-600' : ''
+                    }`}
+                    onClick={() => {
+                      setSelectedCategory(category.title);
+                      setShowCategoryDropdown(false);
+                    }}
+                  >
+                    {category.title}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
+
+        <button
+          onClick={handleSearch}
+          disabled={!selectedCity || !selectedCategory}
+          className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+        >
+          Search
+        </button>
       </div>
     </div>
   );

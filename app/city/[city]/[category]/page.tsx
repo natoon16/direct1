@@ -3,17 +3,19 @@ import { categories, Category } from '../../../data/keywords';
 import { searchPlaces, PlaceData } from '../../../lib/places';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
+import Image from 'next/image';
 import VendorCard from '../../../components/VendorCard';
 
 interface Props {
-  params: {
+  params: Promise<{
     city: string;
     category: string;
-  };
+  }>;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { category, city } = params;
+  const resolvedParams = await params;
+  const { category, city } = resolvedParams;
   const formattedCategory = category.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
   const formattedCity = city.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
 
@@ -24,7 +26,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function CategoryCityPage({ params }: Props) {
-  const { category, city } = params;
+  const resolvedParams = await params;
+  const { category, city } = resolvedParams;
   const formattedCategory = category.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
   const formattedCity = city.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
 
@@ -51,10 +54,12 @@ export default async function CategoryCityPage({ params }: Props) {
               >
                 {place.photos && place.photos.length > 0 && (
                   <div className="relative h-48 w-full">
-                    <img
+                    <Image
                       src={`https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photo_reference=${place.photos[0]}&key=${process.env.GOOGLE_PLACES_API_KEY}`}
                       alt={place.name}
-                      className="object-cover w-full h-full"
+                      fill
+                      className="object-cover"
+                      unoptimized
                     />
                   </div>
                 )}

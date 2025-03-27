@@ -65,12 +65,12 @@ export default function SearchBar() {
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto p-4">
-      <div className="bg-white rounded-lg shadow-lg p-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="w-full max-w-4xl mx-auto">
+      <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-2xl p-8 border border-white/20">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* City Selection */}
           <div ref={cityRef} className="relative">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               Select City
             </label>
             <input
@@ -84,30 +84,30 @@ export default function SearchBar() {
               }}
               onFocus={() => setIsCityOpen(true)}
               placeholder="Search from 100+ Florida cities..."
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm"
             />
             {isCityOpen && (
               <div 
                 ref={cityDropdownRef}
-                className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-[400px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100"
+                className="absolute z-10 w-full mt-2 bg-white border border-gray-200 rounded-xl shadow-xl max-h-[400px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100"
               >
                 {filteredCities.length > 0 ? (
                   filteredCities.map((city: City) => (
                     <div
                       key={city.name}
-                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center justify-between"
+                      className="px-4 py-3 hover:bg-indigo-50 cursor-pointer flex items-center justify-between border-b border-gray-100 last:border-b-0"
                       onClick={() => {
                         setSelectedCity(city.name);
                         setCitySearch('');
                         setIsCityOpen(false);
                       }}
                     >
-                      <span>{city.name}</span>
+                      <span className="font-medium">{city.name}</span>
                       <span className="text-sm text-gray-500">{city.county} County</span>
                     </div>
                   ))
                 ) : (
-                  <div className="px-4 py-2 text-gray-500">No cities found</div>
+                  <div className="px-4 py-3 text-gray-500">No cities found</div>
                 )}
               </div>
             )}
@@ -115,7 +115,7 @@ export default function SearchBar() {
 
           {/* Category Selection */}
           <div ref={categoryRef} className="relative">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               Select Category
             </label>
             <input
@@ -128,15 +128,15 @@ export default function SearchBar() {
               }}
               onFocus={() => setIsCategoryOpen(true)}
               placeholder="Search from 50+ vendor categories..."
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm"
             />
             {isCategoryOpen && (
-              <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-[400px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
+              <div className="absolute z-10 w-full mt-2 bg-white border border-gray-200 rounded-xl shadow-xl max-h-[400px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
                 {filteredCategories.length > 0 ? (
                   filteredCategories.map((category: Category) => (
                     <div
                       key={category.slug}
-                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                      className="px-4 py-3 hover:bg-indigo-50 cursor-pointer border-b border-gray-100 last:border-b-0"
                       onClick={() => {
                         setSelectedCategory(category.title);
                         setCategorySearch('');
@@ -147,7 +147,7 @@ export default function SearchBar() {
                     </div>
                   ))
                 ) : (
-                  <div className="px-4 py-2 text-gray-500">No categories found</div>
+                  <div className="px-4 py-3 text-gray-500">No categories found</div>
                 )}
               </div>
             )}
@@ -155,13 +155,13 @@ export default function SearchBar() {
         </div>
 
         {/* Search Button */}
-        <div className="mt-6 text-center">
+        <div className="mt-8 text-center">
           <button
             onClick={handleSearch}
             disabled={!selectedCity || !selectedCategory}
-            className={`px-8 py-3 rounded-md text-white font-medium ${
+            className={`px-10 py-3 rounded-xl text-white font-medium text-lg transition-all duration-200 ${
               selectedCity && selectedCategory
-                ? 'bg-blue-600 hover:bg-blue-700'
+                ? 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-xl'
                 : 'bg-gray-400 cursor-not-allowed'
             }`}
           >

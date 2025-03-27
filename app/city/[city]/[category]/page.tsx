@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import { cities } from '../../../data/cities';
 import { categories } from '../../../data/keywords';
-import { vendors } from '../../../data/vendors';
+import { searchPlaces, convertPlaceToVendor } from '../../../lib/places';
 import VendorCard from '../../../components/VendorCard';
 import { Metadata } from 'next';
 
@@ -52,12 +52,9 @@ export default async function CityCategoryPage({ params }: CityCategoryPageProps
     notFound();
   }
 
-  // Filter vendors by city and category
-  const filteredVendors = vendors.filter(
-    vendor => 
-      vendor.city.toLowerCase() === cityName.toLowerCase() &&
-      vendor.category.toLowerCase() === category.title.toLowerCase()
-  );
+  // Fetch vendors from Places API
+  const places = await searchPlaces(category.title, cityName);
+  const vendors = places.map(place => convertPlaceToVendor(place, category.title, cityName));
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -68,9 +65,9 @@ export default async function CityCategoryPage({ params }: CityCategoryPageProps
         Find the perfect {category.title.toLowerCase()} for your wedding
       </p>
 
-      {filteredVendors.length > 0 ? (
+      {vendors.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredVendors.map((vendor) => (
+          {vendors.map((vendor) => (
             <VendorCard key={vendor.id} vendor={vendor} />
           ))}
         </div>

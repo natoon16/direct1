@@ -1,9 +1,9 @@
-import { cities } from '@/app/data/cities';
-import { categories } from '@/app/data/keywords';
-import { vendors } from '@/app/data/vendors';
-import VendorCard from '@/app/components/VendorCard';
-import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { cities } from '../../../data/cities';
+import { categories } from '../../../data/keywords';
+import { vendors } from '../../../data/vendors';
+import VendorCard from '../../../components/VendorCard';
+import { Metadata } from 'next';
 
 interface CityCategoryPageProps {
   params: {

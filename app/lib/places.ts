@@ -1,108 +1,82 @@
-import { Client, PlaceData, PlacesNearbyResponse } from '@googlemaps/google-maps-services-js';
-import { getCachedResults, cacheResults } from './mongodb';
+import { Client } from '@googlemaps/google-maps-services-js';
+import { Place } from './models/Place';
+import connectDB from './mongodb';
 
 const client = new Client({});
 
-export interface Place {
-  place_id: string;
-  name: string;
-  formatted_address: string;
-  rating?: number;
-  user_ratings_total?: number;
-  website?: string;
-  phone?: string;
-  opening_hours?: {
-    open_now: boolean;
-    weekday_text: string[];
-  };
-  price_level?: number;
-  types: string[];
-}
+export async function searchPlaces(category: string, city: string) {
+  await connectDB();
 
-const PLACE_FIELDS = [
-  'name',
-  'formatted_address',
-  'rating',
-  'user_ratings_total',
-  'website',
-  'phone',
-  'opening_hours',
-  'price_level',
-  'types',
-];
-
-const PLACE_DETAIL_FIELDS = [
-  ...PLACE_FIELDS,
-  'reviews',
-  'formatted_phone_number',
-  'international_phone_number',
-  'business_status',
-];
-
-export async function searchPlaces(
-  city: string,
-  category: string,
-  page: number = 1,
-  pageSize: number = 20
-) {
-  const query = `${city}-${category}-${page}`;
-  
   // Check cache first
-  const cachedResults = await getCachedResults(query);
-  if (cachedResults) {
-    return { places: cachedResults };
+  const cachedPlaces = await Place.find({
+    category: category.toLowerCase(),
+    city: city.toLowerCase(),
+    last_updated: { $gt: new Date(Date.now() - 6 * 30 * 24 * 60 * 60 * 1000) } // 6 months
+  }).exec();
+
+  if (cachedPlaces.length > 0) {
+    return cachedPlaces;
   }
 
+  // If not in cache, search using Google Places API
   try {
-    // First, get the city's coordinates
-    const geocodeResponse = await client.geocode({
+    const query = `${category} in ${city}, Florida`;
+    const response = await client.textSearch({
       params: {
-        address: `${city}, Florida`,
-        key: process.env.GOOGLE_MAPS_API_KEY!,
+        query,
+        key: process.env.GOOGLE_PLACES_API_KEY!,
+        region: 'us',
       },
     });
 
-    if (!geocodeResponse.data.results.length) {
-      throw new Error('City not found');
+    if (response.data.status === 'OK') {
+      const places = await Promise.all(
+        response.data.results.map(async (result) => {
+          // Get place details for additional information
+          const detailsResponse = await client.placeDetails({
+            params: {
+              place_id: result.place_id,
+              key: process.env.GOOGLE_PLACES_API_KEY!,
+              fields: ['formatted_phone_number', 'website', 'photos', 'reviews'],
+            },
+          });
+
+          const placeData = {
+            place_id: result.place_id,
+            name: result.name,
+            address: result.formatted_address,
+            phone: detailsResponse.data.result?.formatted_phone_number || '',
+            website: detailsResponse.data.result?.website || '',
+            rating: result.rating || 0,
+            reviews: result.user_ratings_total || 0,
+            photos: result.photos?.map(photo => photo.photo_reference) || [],
+            category: category.toLowerCase(),
+            city: city.toLowerCase(),
+            state: 'Florida',
+            country: 'USA',
+            lat: result.geometry.location.lat,
+            lng: result.geometry.location.lng,
+            last_updated: new Date(),
+          };
+
+          // Cache the place data
+          await Place.findOneAndUpdate(
+            { place_id: placeData.place_id },
+            placeData,
+            { upsert: true, new: true }
+          );
+
+          return placeData;
+        })
+      );
+
+      return places;
     }
 
-    const location = geocodeResponse.data.results[0].geometry.location;
-
-    // Search for places
-    const placesResponse = await client.placesNearby({
-      params: {
-        location,
-        radius: 50000, // 50km radius
-        type: category.toLowerCase(),
-        key: process.env.GOOGLE_MAPS_API_KEY!,
-      },
-    });
-
-    // Get detailed information for each place
-    const places = await Promise.all(
-      placesResponse.data.results.map(async (place) => {
-        if (!place.place_id) return null;
-        
-        const detailsResponse = await client.placeDetails({
-          params: {
-            place_id: place.place_id,
-            fields: PLACE_FIELDS,
-            key: process.env.GOOGLE_MAPS_API_KEY!,
-          },
-        });
-
-        return detailsResponse.data.result as Place;
-      })
-    );
-
-    // Filter out null values and cache the results
-    const validPlaces = places.filter((place): place is Place => place !== null);
-    await cacheResults(query, validPlaces);
-
-    return { places: validPlaces };
+    return [];
   } catch (error) {
     console.error('Error searching places:', error);
-    throw error;
+    return [];
   }
 }
 

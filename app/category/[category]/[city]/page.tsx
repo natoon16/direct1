@@ -1,9 +1,12 @@
 import { cities, City } from '../../../data/cities';
 import { categories, Category } from '../../../data/keywords';
-import { searchPlaces, Place } from '../../../lib/places';
+import { searchPlaces } from '../../../lib/places';
+import { Place } from '../../../lib/models/Place';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import VendorCard from '../../../components/VendorCard';
+import Image from 'next/image';
+import Link from 'next/link';
 
 type Props = {
   params: Promise<{
@@ -50,40 +53,97 @@ export default async function CategoryCityPage({ params }: Props) {
 
   try {
     // Search for vendors using Google Places API with caching
-    const { places } = await searchPlaces(cityName, category.name);
+    const places: Place[] = await searchPlaces(cityName, category.name);
 
     return (
-      <div className="bg-white">
-        <div className="mx-auto max-w-7xl px-6 lg:px-8 py-24 sm:py-32">
-          {/* Hero Section */}
-          <div className="mx-auto max-w-2xl lg:mx-0">
-            <h1 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-              {category.title} in {city.name}, Florida
+      <div className="bg-white min-h-screen">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="text-center mb-12">
+            <h1 className="text-4xl font-bold text-gray-900 sm:text-5xl">
+              {category.title} in {city.name}, FL
             </h1>
-            <p className="mt-6 text-lg leading-8 text-gray-600">
-              Browse and connect with the best {category.title.toLowerCase()} in {city.name}. 
-              Find the perfect wedding professional for your special day.
+            <p className="mt-4 text-xl text-gray-600">
+              Find the perfect {category.title.toLowerCase()} for your wedding
             </p>
           </div>
 
-          {/* Results Grid */}
-          <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {places.length > 0 ? (
-              places.map((place: Place) => (
-                <VendorCard key={place.place_id} vendor={place} />
-              ))
-            ) : (
-              <div className="col-span-full text-center py-12">
-                <h2 className="text-xl font-semibold text-gray-900">
-                  No vendors found
-                </h2>
-                <p className="mt-2 text-gray-600">
-                  We couldn't find any {category.title.toLowerCase()} in {city.name} at the moment. 
-                  Please try another category or city.
-                </p>
-              </div>
-            )}
-          </div>
+          {places.length > 0 ? (
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+              {places.map((place) => (
+                <div
+                  key={place.place_id}
+                  className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200 hover:shadow-xl transition-shadow duration-300"
+                >
+                  {place.photos && place.photos.length > 0 && (
+                    <div className="relative h-48 w-full">
+                      <Image
+                        src={`https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photo_reference=${place.photos[0]}&key=${process.env.GOOGLE_PLACES_API_KEY}`}
+                        alt={place.name}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                  )}
+                  <div className="p-6">
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                      {place.name}
+                    </h3>
+                    <p className="text-gray-600 mb-4">{place.address}</p>
+                    <div className="flex items-center mb-4">
+                      <div className="flex items-center">
+                        {[...Array(5)].map((_, i) => (
+                          <svg
+                            key={i}
+                            className={`h-5 w-5 ${
+                              i < Math.round(place.rating)
+                                ? 'text-yellow-400'
+                                : 'text-gray-300'
+                            }`}
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                          </svg>
+                        ))}
+                        <span className="ml-2 text-gray-600">
+                          ({place.reviews} reviews)
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {place.website && (
+                        <a
+                          href={place.website}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+                        >
+                          Visit Website
+                        </a>
+                      )}
+                      {place.phone && (
+                        <a
+                          href={`tel:${place.phone}`}
+                          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-600 bg-indigo-100 hover:bg-indigo-200"
+                        >
+                          {place.phone}
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">
+                No vendors found
+              </h2>
+              <p className="text-gray-600">
+                We couldn't find any {category.title.toLowerCase()} in {city.name}. Try searching in a different city or category.
+              </p>
+            </div>
+          )}
         </div>
       </div>
     );

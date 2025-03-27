@@ -24,6 +24,8 @@ const placeDetailFields: PlaceFields[] = [...PLACE_DETAIL_FIELDS];
 export type { PlaceData };
 
 export async function searchPlaces(category: string, city: string): Promise<PlaceData[]> {
+  console.log('Searching for:', { category, city });
+  
   await connectDB();
 
   // Check cache first
@@ -33,20 +35,29 @@ export async function searchPlaces(category: string, city: string): Promise<Plac
     last_updated: { $gt: new Date(Date.now() - 6 * 30 * 24 * 60 * 60 * 1000) } // 6 months
   }).exec();
 
+  console.log('Cached places found:', cachedPlaces.length);
+
   if (cachedPlaces.length > 0) {
     return cachedPlaces;
   }
 
   // If not in cache, search using Google Places API
   try {
-    const query = `${category} in ${city}, Florida`;
+    // Modify the query to be more flexible
+    const query = `${category} wedding vendor ${city} FL`;
+    console.log('Google Places API query:', query);
+
     const response = await client.textSearch({
       params: {
         query,
         key: process.env.GOOGLE_PLACES_API_KEY!,
         region: 'us',
+        type: 'establishment', // Add this to focus on businesses
       },
     });
+
+    console.log('Google Places API response status:', response.data.status);
+    console.log('Results found:', response.data.results?.length || 0);
 
     if (response.data.status === 'OK' && response.data.results) {
       const places = await Promise.all(
@@ -93,9 +104,12 @@ export async function searchPlaces(category: string, city: string): Promise<Plac
         })
       );
 
-      return places.filter((place): place is PlaceData => place !== null);
+      const filteredPlaces = places.filter((place): place is PlaceData => place !== null);
+      console.log('Final places count:', filteredPlaces.length);
+      return filteredPlaces;
     }
 
+    console.log('No results found or API error');
     return [];
   } catch (error) {
     console.error('Error searching places:', error);
@@ -116,7 +130,7 @@ export async function getPlaceDetails(placeId: string): Promise<PlaceData | null
     const response = await client.placeDetails({
       params: {
         place_id: placeId,
-        fields: placeDetailFields,
+        fields: PLACE_DETAIL_FIELDS as PlaceFields[],
         key: process.env.GOOGLE_MAPS_API_KEY!,
       },
     });

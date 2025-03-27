@@ -26,20 +26,57 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function CategoryCityPage({ params }: Props) {
   const resolvedParams = await params;
   const { category, city } = resolvedParams;
+  
+  // Format the category and city for display
   const formattedCategory = category.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
   const formattedCity = city.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
 
-  const places: PlaceData[] = await searchPlaces(formattedCategory, formattedCity);
+  console.log('Searching with params:', {
+    category: formattedCategory,
+    city: formattedCity,
+    originalCategory: category,
+    originalCity: city
+  });
+
+  // Validate category and city
+  const validCategory = categories.find(
+    (c: Category) => c.slug.toLowerCase() === category.toLowerCase() ||
+                    c.title.toLowerCase() === formattedCategory.toLowerCase()
+  );
+
+  const validCity = cities.find(
+    (c: City) => c.name.toLowerCase() === formattedCity.toLowerCase()
+  );
+
+  console.log('Validation results:', {
+    categoryValid: !!validCategory,
+    cityValid: !!validCity,
+    foundCategory: validCategory?.title,
+    foundCity: validCity?.name
+  });
+
+  if (!validCategory || !validCity) {
+    console.log('Invalid category or city, redirecting to 404');
+    notFound();
+  }
+
+  // Use the validated category and city names for the search
+  const places: PlaceData[] = await searchPlaces(
+    validCategory.title,
+    validCity.name
+  );
+
+  console.log(`Found ${places.length} places for ${validCategory.title} in ${validCity.name}`);
 
   return (
     <div className="bg-white min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-900 sm:text-5xl">
-            {formattedCategory} in {formattedCity}, FL
+            {validCategory.title} in {validCity.name}, FL
           </h1>
           <p className="mt-4 text-xl text-gray-600">
-            Find the perfect {formattedCategory.toLowerCase()} for your wedding
+            Find the perfect {validCategory.title.toLowerCase()} for your wedding
           </p>
         </div>
 
@@ -106,7 +143,7 @@ export default async function CategoryCityPage({ params }: Props) {
               No vendors found
             </h2>
             <p className="text-gray-600">
-              We couldn't find any {formattedCategory.toLowerCase()} in {formattedCity}. Try searching in a different city or category.
+              We couldn't find any {validCategory.title.toLowerCase()} in {validCity.name}. Try searching in a different city or category.
             </p>
           </div>
         )}

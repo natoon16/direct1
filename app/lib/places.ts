@@ -1,4 +1,4 @@
-import { Client } from '@googlemaps/google-maps-services-js';
+import { Client, PlaceDetailsResponse } from '@googlemaps/google-maps-services-js';
 import { Place } from './models/Place';
 import connectDB, { getCachedResults, cacheResults } from './mongodb';
 
@@ -14,6 +14,11 @@ const PLACE_DETAIL_FIELDS = [
   'geometry',
   'formatted_address',
 ] as const;
+
+type PlaceFields = (typeof PLACE_DETAIL_FIELDS)[number];
+
+// Convert readonly array to mutable array
+const placeDetailFields: PlaceFields[] = [...PLACE_DETAIL_FIELDS];
 
 export interface PlaceData {
   place_id: string;
@@ -70,7 +75,7 @@ export async function searchPlaces(category: string, city: string): Promise<Plac
             params: {
               place_id: result.place_id,
               key: process.env.GOOGLE_PLACES_API_KEY!,
-              fields: PLACE_DETAIL_FIELDS,
+              fields: placeDetailFields,
             },
           });
 
@@ -126,7 +131,7 @@ export async function getPlaceDetails(placeId: string): Promise<PlaceData | null
     const response = await client.placeDetails({
       params: {
         place_id: placeId,
-        fields: PLACE_DETAIL_FIELDS,
+        fields: placeDetailFields,
         key: process.env.GOOGLE_MAPS_API_KEY!,
       },
     });
@@ -135,7 +140,24 @@ export async function getPlaceDetails(placeId: string): Promise<PlaceData | null
       return null;
     }
 
-    const placeData = response.data.result as PlaceData;
+    const result = response.data.result;
+    const placeData: PlaceData = {
+      place_id: placeId,
+      name: result.name || '',
+      address: result.formatted_address || '',
+      phone: result.formatted_phone_number || '',
+      website: result.website || '',
+      rating: result.rating || 0,
+      reviews: result.user_ratings_total || 0,
+      photos: result.photos?.map(photo => photo.photo_reference) || [],
+      category: '',  // These will be filled by the caller
+      city: '',
+      state: 'Florida',
+      country: 'USA',
+      lat: result.geometry?.location?.lat || 0,
+      lng: result.geometry?.location?.lng || 0,
+      last_updated: new Date(),
+    };
 
     // Cache the result
     await cacheResults(query, [placeData]);

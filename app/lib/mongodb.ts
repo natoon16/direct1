@@ -1,47 +1,28 @@
 import mongoose from 'mongoose';
 
-declare global {
-  var mongoose: {
-    conn: typeof mongoose | null;
-    promise: Promise<typeof mongoose> | null;
-  } | undefined;
-}
-
 if (!process.env.MONGODB_URI) {
   throw new Error('Please define the MONGODB_URI environment variable inside .env.local');
 }
 
 const MONGODB_URI = process.env.MONGODB_URI;
 
-let cached = global.mongoose;
+let isConnected = false;
 
-if (!cached) {
-  cached = global.mongoose = { conn: null, promise: null };
-}
-
-async function connectDB() {
-  if (cached.conn) {
-    return cached.conn;
-  }
-
-  if (!cached.promise) {
-    const opts = {
-      bufferCommands: false,
-    };
-
-    cached.promise = mongoose.connect(MONGODB_URI!, opts).then((mongoose) => {
-      return mongoose;
-    });
+async function connectDB(): Promise<typeof mongoose> {
+  if (isConnected) {
+    return mongoose;
   }
 
   try {
-    cached.conn = await cached.promise;
-  } catch (e) {
-    cached.promise = null;
-    throw e;
+    await mongoose.connect(MONGODB_URI!, {
+      bufferCommands: false,
+    });
+    isConnected = true;
+    return mongoose;
+  } catch (error) {
+    console.error('MongoDB connection error:', error);
+    throw error;
   }
-
-  return cached.conn;
 }
 
 export default connectDB;
@@ -57,10 +38,11 @@ export interface CacheEntry {
 
 export async function getCachedResults(query: string) {
   try {
-    const client = await connectDB();
-    const db = client.db('wedding-directory');
+    const mongoose = await connectDB();
+    const db = mongoose.connection.db;
+    if (!db) throw new Error('Database not connected');
+    
     const cache = db.collection('search-cache');
-
     const entry = await cache.findOne({ query });
     if (!entry) return null;
 
@@ -79,10 +61,11 @@ export async function getCachedResults(query: string) {
 
 export async function cacheResults(query: string, results: any[]) {
   try {
-    const client = await connectDB();
-    const db = client.db('wedding-directory');
+    const mongoose = await connectDB();
+    const db = mongoose.connection.db;
+    if (!db) throw new Error('Database not connected');
+    
     const cache = db.collection('search-cache');
-
     await cache.updateOne(
       { query },
       {
@@ -101,8 +84,11 @@ export async function cacheResults(query: string, results: any[]) {
 // Function to check database connection
 export async function checkConnection() {
   try {
-    const client = await connectDB();
-    await client.db('wedding-directory').command({ ping: 1 });
+    const mongoose = await connectDB();
+    const db = mongoose.connection.db;
+    if (!db) throw new Error('Database not connected');
+    
+    await db.command({ ping: 1 });
     return { isConnected: true };
   } catch (error) {
     console.error('Database connection error:', error);

@@ -9,29 +9,29 @@ import { searchPlaces, convertPlaceToVendor } from '../../../app/lib/places';
 import VendorCard from '../../../app/components/VendorCard';
 import { PlaceData } from '../../../app/lib/types';
 
-interface CategoryPageProps {
+type Props = {
   params: {
     category: string;
   };
-}
+};
 
-export async function generateMetadata({ params }: CategoryPageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const category = categories.find((c: Category) => c.slug === params.category);
 
   if (!category) {
     return {
-      title: 'Category Not Found - Wedding Directory Florida',
-      description: 'The requested category was not found in our directory.'
+      title: 'Category Not Found',
+      description: 'The requested category could not be found.'
     };
   }
 
   return {
-    title: `${category.title} in Florida - Wedding Directory Florida`,
-    description: `Find the best ${category.title.toLowerCase()} across Florida. Browse and connect with top-rated wedding ${category.name.toLowerCase()} for your special day.`,
+    title: `${category.title} in Florida - Wedding Directory`,
+    description: `Find the best ${category.title.toLowerCase()} across Florida. Browse and connect with top-rated wedding professionals.`
   };
 }
 
-export default async function CategoryPage({ params }: CategoryPageProps) {
+export default async function CategoryPage({ params }: Props) {
   const category = categories.find((c: Category) => c.slug === params.category);
   
   if (!category) {

@@ -1,5 +1,5 @@
 export interface PlaceData {
-  place_id: string;
+  id: string;
   name: string;
   address: string;
   phone?: string;
@@ -7,11 +7,11 @@ export interface PlaceData {
   rating?: number;
   reviews?: number;
   photos?: string[];
-  category: string;
-  city: string;
-  state: string;
-  country: string;
-  lat: number;
-  lng: number;
-  last_updated: Date;
+  category?: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  lat?: number;
+  lng?: number;
+  last_updated?: Date;
 } 

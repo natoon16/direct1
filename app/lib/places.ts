@@ -31,7 +31,7 @@ export async function searchPlaces(category: string, city: string): Promise<Plac
       headers: {
         'Content-Type': 'application/json',
         'X-Goog-Api-Key': GOOGLE_PLACES_API_KEY || '',
-        'X-Goog-FieldMask': 'places.displayName,places.formattedAddress,places.phoneNumber,places.websiteUri,places.rating,places.userRatingCount'
+        'X-Goog-FieldMask': 'places.displayName,places.formattedAddress,places.phoneNumber,places.websiteUri,places.rating,places.userRatingCount,places.location'
       },
       body: JSON.stringify({
         textQuery: `${category} in ${city}, Florida`,
@@ -51,7 +51,14 @@ export async function searchPlaces(category: string, city: string): Promise<Plac
       phone: place.phoneNumber || '',
       website: place.websiteUri || '',
       rating: place.rating || 0,
-      reviews: place.userRatingCount || 0
+      reviews: place.userRatingCount || 0,
+      lat: place.location?.latitude || 0,
+      lng: place.location?.longitude || 0,
+      category: category,
+      city: city,
+      state: 'florida',
+      country: 'united states',
+      last_updated: new Date()
     }));
   } catch (error) {
     console.error('Error fetching places:', error);
@@ -76,18 +83,17 @@ export function convertPlaceToVendor(place: PlaceData, category: string, city: s
 
 export async function getPlaceDetails(placeId: string): Promise<PlaceData | null> {
   try {
-    const query = `place-${placeId}`;
-    
-    // Check cache first
-    const cachedResult = await getCachedResults(query);
-    if (cachedResult.length > 0) {
-      return cachedResult[0];
-    }
-
     const response = await client.placeDetails({
       params: {
         place_id: placeId,
-        fields: [...PLACE_DETAIL_FIELDS],
+        fields: [
+          'formatted_phone_number',
+          'website',
+          'rating',
+          'user_ratings_total',
+          'geometry',
+          'formatted_address'
+        ],
         key: process.env.GOOGLE_MAPS_API_KEY!,
       },
     });
@@ -102,17 +108,14 @@ export async function getPlaceDetails(placeId: string): Promise<PlaceData | null
       return null;
     }
 
-    const placeData: PlaceData = {
-      place_id: place.place_id,
+    return {
+      id: place.place_id,
       name: place.name || '',
       address: place.formatted_address || '',
       phone: place.formatted_phone_number || '',
       website: place.website || '',
       rating: place.rating || 0,
       reviews: place.user_ratings_total || 0,
-      photos: place.photos?.map(photo => 
-        `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photo_reference=${photo.photo_reference}&key=${process.env.GOOGLE_MAPS_API_KEY}`
-      ) || [],
       category: '', // This will be set by the caller
       city: '', // This will be set by the caller
       state: 'florida',
@@ -121,11 +124,6 @@ export async function getPlaceDetails(placeId: string): Promise<PlaceData | null
       lng: place.geometry.location.lng,
       last_updated: new Date(),
     };
-
-    // Cache the result
-    await cacheResults(query, placeData);
-
-    return placeData;
   } catch (error) {
     console.error('Error getting place details:', error);
     return null;

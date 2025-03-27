@@ -3,6 +3,7 @@ import { Place } from './models/Place';
 import { getCachedResults, cacheResults } from './mongodb';
 import { PlaceData } from './types';
 import { Vendor } from '../data/vendors';
+import clientPromise from '../../lib/mongodb';
 
 const client = new Client({});
 
@@ -22,12 +23,68 @@ type PlaceFields = typeof PLACE_DETAIL_FIELDS[number];
 const GOOGLE_PLACES_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY;
 const GOOGLE_PLACES_API_URL = 'https://places.googleapis.com/v1/places:searchText';
 
+const SIX_MONTHS = 15778800000; // 6 months in milliseconds
+
+interface CachedVendor {
+  _id?: string;
+  placeId?: string;
+  name: string;
+  address: string;
+  phone?: string;
+  website?: string;
+  rating?: number;
+  reviews?: number;
+  location?: {
+    latitude: number;
+    longitude: number;
+  };
+  category?: string;
+  city: string;
+  lastUpdated: Date;
+}
+
 export type { PlaceData };
 
 export async function searchPlaces(category: string, city: string): Promise<PlaceData[]> {
   try {
     console.log('Searching for:', { category, city });
 
+    // First, try to get from MongoDB cache
+    const client = await clientPromise;
+    const db = client.db("weddingDirectory");
+    const collection = db.collection<CachedVendor>("vendors");
+
+    const query = {
+      city: city.toLowerCase(),
+      category: category.toLowerCase(),
+      lastUpdated: { $gt: new Date(Date.now() - SIX_MONTHS) }
+    };
+
+    console.log('MongoDB query:', query);
+    const cachedVendors = await collection.find(query).toArray();
+    console.log('Found cached vendors:', cachedVendors.length);
+
+    if (cachedVendors.length > 0) {
+      return cachedVendors.map((vendor: CachedVendor) => ({
+        id: vendor.placeId || vendor._id?.toString() || '',
+        name: vendor.name,
+        address: vendor.address,
+        phone: vendor.phone || '',
+        website: vendor.website || '',
+        rating: vendor.rating || 0,
+        reviews: vendor.reviews || 0,
+        lat: vendor.location?.latitude || 0,
+        lng: vendor.location?.longitude || 0,
+        category: vendor.category || category,
+        city: vendor.city || city,
+        state: 'florida',
+        country: 'united states',
+        last_updated: vendor.lastUpdated || new Date()
+      }));
+    }
+
+    // If no cached results, fetch from Google Places API
+    console.log('No cached results, fetching from Google Places API');
     const response = await fetch('/api/places', {
       method: 'POST',
       headers: {
@@ -53,7 +110,7 @@ export async function searchPlaces(category: string, city: string): Promise<Plac
       return [];
     }
 
-    return data.places.map((place: any) => ({
+    const places = data.places.map((place: any) => ({
       id: place.id,
       name: place.displayName?.text || '',
       address: place.formattedAddress || '',
@@ -69,6 +126,35 @@ export async function searchPlaces(category: string, city: string): Promise<Plac
       country: 'united states',
       last_updated: new Date()
     }));
+
+    // Cache the results in MongoDB
+    if (places.length > 0) {
+      try {
+        const vendorsToCache = places.map((place: PlaceData) => ({
+          placeId: place.id,
+          name: place.name,
+          address: place.address,
+          phone: place.phone,
+          website: place.website,
+          rating: place.rating,
+          reviews: place.reviews,
+          location: {
+            latitude: place.lat,
+            longitude: place.lng
+          },
+          category: place.category,
+          city: place.city,
+          lastUpdated: place.last_updated
+        }));
+
+        await collection.insertMany(vendorsToCache);
+        console.log('Cached new vendors in MongoDB:', vendorsToCache.length);
+      } catch (error) {
+        console.error('Error caching vendors:', error);
+      }
+    }
+
+    return places;
   } catch (error) {
     console.error('Error in searchPlaces:', error);
     return [];

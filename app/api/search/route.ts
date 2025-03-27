@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { searchPlaces } from '@/app/lib/places';
+import { searchPlaces } from '../../lib/places';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);

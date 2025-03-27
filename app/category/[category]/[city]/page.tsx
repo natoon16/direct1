@@ -1,7 +1,6 @@
 import { cities, City } from '../../../data/cities';
 import { categories, Category } from '../../../data/keywords';
-import { searchPlaces } from '../../../lib/places';
-import { Place } from '../../../lib/models/Place';
+import { searchPlaces, PlaceData } from '../../../lib/places';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import VendorCard from '../../../components/VendorCard';
@@ -53,7 +52,7 @@ export default async function CategoryCityPage({ params }: Props) {
 
   try {
     // Search for vendors using Google Places API with caching
-    const places: Place[] = await searchPlaces(cityName, category.name);
+    const places: PlaceData[] = await searchPlaces(cityName, category.name);
 
     return (
       <div className="bg-white min-h-screen">

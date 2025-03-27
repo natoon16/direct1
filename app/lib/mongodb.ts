@@ -39,33 +39,6 @@ async function connectDB() {
   return cached.conn;
 }
 
-export async function getCachedResults(query: string): Promise<PlaceData[]> {
-  await connectDB();
-  const sixMonthsAgo = new Date();
-  sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-  
-  const places = await Place.find({
-    $or: [
-      { category: query.toLowerCase() },
-      { city: query.toLowerCase() }
-    ],
-    last_updated: { $gte: sixMonthsAgo }
-  });
-  
-  return places;
-}
-
-export async function cacheResults(query: string, place: PlaceData): Promise<void> {
-  await connectDB();
-  await Place.findOneAndUpdate(
-    { place_id: place.place_id },
-    place,
-    { upsert: true }
-  );
-}
-
-export default connectDB;
-
 // Cache duration in milliseconds (6 months)
 export const CACHE_DURATION = 6 * 30 * 24 * 60 * 60 * 1000;
 
@@ -75,44 +48,33 @@ export interface CacheEntry {
   timestamp: number;
 }
 
-export async function getCachedResults(query: string) {
+export async function getCachedResults(query: string): Promise<PlaceData[]> {
   try {
-    const mongoose = await connectDB();
-    const db = mongoose.connection.db;
-    if (!db) throw new Error('Database not connected');
+    await connectDB();
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
     
-    const cache = db.collection('search-cache');
-    const entry = await cache.findOne({ query });
-    if (!entry) return null;
-
-    const now = Date.now();
-    if (now - entry.timestamp > CACHE_DURATION) {
-      await cache.deleteOne({ query });
-      return null;
-    }
-
-    return entry.results;
+    const places = await Place.find({
+      $or: [
+        { category: query.toLowerCase() },
+        { city: query.toLowerCase() }
+      ],
+      last_updated: { $gte: sixMonthsAgo }
+    });
+    
+    return places;
   } catch (error) {
     console.error('Error getting cached results:', error);
-    return null;
+    return [];
   }
 }
 
-export async function cacheResults(query: string, results: any[]) {
+export async function cacheResults(query: string, place: PlaceData): Promise<void> {
   try {
-    const mongoose = await connectDB();
-    const db = mongoose.connection.db;
-    if (!db) throw new Error('Database not connected');
-    
-    const cache = db.collection('search-cache');
-    await cache.updateOne(
-      { query },
-      {
-        $set: {
-          results,
-          timestamp: Date.now(),
-        },
-      },
+    await connectDB();
+    await Place.findOneAndUpdate(
+      { place_id: place.place_id },
+      place,
       { upsert: true }
     );
   } catch (error) {
@@ -133,4 +95,6 @@ export async function checkConnection() {
     console.error('Database connection error:', error);
     return { isConnected: false, error };
   }
-} 
+}
+
+export default connectDB; 

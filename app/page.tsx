@@ -27,7 +27,7 @@ export default function Home() {
               </div>
             </div>
           </div>
-          <div className="mt-20 sm:mt-24 md:mx-auto md:max-w-2xl lg:mx-0 lg:mt-0 lg:w-screen">
+          <div className="mt-20 sm:mt-24 md:mx-auto md:max-w-2xl lg:mx-0 lg:mt-0">
             <div className="absolute inset-y-0 right-1/2 -z-10 -mr-10 w-[200%] skew-x-[-30deg] bg-white shadow-xl ring-1 ring-gray-900/10 md:-mr-20 lg:-mr-36" aria-hidden="true" />
             <div className="shadow-lg md:rounded-3xl">
               <div className="bg-indigo-500 [clip-path:inset(0)] md:[clip-path:inset(0_round_theme(borderRadius.3xl))]">
@@ -38,7 +38,7 @@ export default function Home() {
                       <div className="flex bg-gray-800/40 ring-1 ring-white/5">
                         <div className="-mb-px flex text-sm font-medium leading-6 text-gray-400">
                           <div className="border-b border-r border-b-white/20 border-r-white/10 bg-white/5 px-4 py-2 text-white">
-                            SearchBar.tsx
+                            Search Vendors
                           </div>
                         </div>
                       </div>
@@ -106,7 +106,7 @@ export default function Home() {
                   {category.title}
                 </h3>
                 <p className="mt-2 text-sm text-gray-500">
-                  Find {category.title.toLowerCase()} across Florida
+                  Find {category.title.toLowerCase()} in Florida
                 </p>
               </div>
             </Link>

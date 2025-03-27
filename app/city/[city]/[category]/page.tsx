@@ -39,14 +39,14 @@ export default async function CityCategoryPage({ params }: CityCategoryPageProps
     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
 
-  const categoryTitle = resolvedParams.category
-    .split('-')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
+  const categorySlug = resolvedParams.category;
 
   // Validate city and category
   const city = cities.find(c => c.name.toLowerCase() === cityName.toLowerCase());
-  const category = categories.find(c => c.title.toLowerCase() === categoryTitle.toLowerCase());
+  const category = categories.find(
+    c => c.slug.toLowerCase() === categorySlug.toLowerCase() ||
+        c.title.toLowerCase().replace(/\s+/g, '-') === categorySlug.toLowerCase()
+  );
 
   if (!city || !category) {
     notFound();
@@ -56,16 +56,16 @@ export default async function CityCategoryPage({ params }: CityCategoryPageProps
   const filteredVendors = vendors.filter(
     vendor => 
       vendor.city.toLowerCase() === cityName.toLowerCase() &&
-      vendor.category.toLowerCase() === categoryTitle.toLowerCase()
+      vendor.category.toLowerCase() === category.title.toLowerCase()
   );
 
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-4xl font-bold text-gray-900 mb-2">
-        {categoryTitle} in {cityName}, FL
+        {category.title} in {cityName}, FL
       </h1>
       <p className="text-xl text-gray-600 mb-8">
-        Find the perfect {categoryTitle.toLowerCase()} for your wedding
+        Find the perfect {category.title.toLowerCase()} for your wedding
       </p>
 
       {filteredVendors.length > 0 ? (
@@ -78,7 +78,7 @@ export default async function CityCategoryPage({ params }: CityCategoryPageProps
         <div className="text-center py-12">
           <h2 className="text-2xl font-semibold text-gray-900 mb-4">No vendors found</h2>
           <p className="text-gray-600">
-            We couldn't find any {categoryTitle.toLowerCase()} in {cityName}. Try searching in a different city or category.
+            We couldn't find any {category.title.toLowerCase()} in {cityName}. Try searching in a different city or category.
           </p>
         </div>
       )}

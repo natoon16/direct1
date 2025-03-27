@@ -27,29 +27,22 @@ export type { PlaceData };
 export async function searchPlaces(category: string, city: string): Promise<PlaceData[]> {
   try {
     console.log('Searching for:', { category, city });
-    console.log('API Key:', GOOGLE_PLACES_API_KEY ? 'Present' : 'Missing');
 
-    const response = await fetch(GOOGLE_PLACES_API_URL, {
+    const response = await fetch('/api/places', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-Goog-Api-Key': GOOGLE_PLACES_API_KEY || '',
-        'X-Goog-FieldMask': 'places.displayName,places.formattedAddress,places.phoneNumber,places.websiteUri,places.rating,places.userRatingCount,places.location'
       },
-      body: JSON.stringify({
-        textQuery: `${category} in ${city}, Florida`,
-        pageSize: 20
-      })
+      body: JSON.stringify({ category, city })
     });
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
+      const errorData = await response.json();
       console.error('API Error:', {
         status: response.status,
-        statusText: response.statusText,
         error: errorData
       });
-      throw new Error(`Failed to fetch places: ${response.status} ${response.statusText}`);
+      throw new Error(`Failed to fetch places: ${response.status}`);
     }
 
     const data = await response.json();
@@ -107,18 +100,10 @@ export async function getPlaceDetails(placeId: string): Promise<PlaceData | null
     });
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      console.error('API Error:', {
-        status: response.status,
-        statusText: response.statusText,
-        error: errorData
-      });
-      throw new Error(`Failed to fetch place details: ${response.status} ${response.statusText}`);
+      throw new Error('Failed to fetch place details');
     }
 
     const place = await response.json();
-    console.log('Place Details Response:', place);
-
     if (!place.id || !place.location) {
       console.error('Place missing required data:', place);
       return null;
@@ -141,7 +126,7 @@ export async function getPlaceDetails(placeId: string): Promise<PlaceData | null
       last_updated: new Date(),
     };
   } catch (error) {
-    console.error('Error in getPlaceDetails:', error);
+    console.error('Error getting place details:', error);
     return null;
   }
 } 

@@ -6,19 +6,20 @@ import VendorCard from '../../../components/VendorCard';
 import { Metadata } from 'next';
 
 interface CityCategoryPageProps {
-  params: {
+  params: Promise<{
     city: string;
     category: string;
-  };
+  }>;
 }
 
 export async function generateMetadata({ params }: CityCategoryPageProps): Promise<Metadata> {
-  const cityName = params.city
+  const resolvedParams = await params;
+  const cityName = resolvedParams.city
     .split('-')
     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
 
-  const categoryTitle = params.category
+  const categoryTitle = resolvedParams.category
     .split('-')
     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
@@ -29,14 +30,16 @@ export async function generateMetadata({ params }: CityCategoryPageProps): Promi
   };
 }
 
-export default function CityCategoryPage({ params }: CityCategoryPageProps) {
+export default async function CityCategoryPage({ params }: CityCategoryPageProps) {
+  const resolvedParams = await params;
+  
   // Convert URL slugs to proper format
-  const cityName = params.city
+  const cityName = resolvedParams.city
     .split('-')
     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
 
-  const categoryTitle = params.category
+  const categoryTitle = resolvedParams.category
     .split('-')
     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');

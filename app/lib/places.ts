@@ -83,45 +83,37 @@ export function convertPlaceToVendor(place: PlaceData, category: string, city: s
 
 export async function getPlaceDetails(placeId: string): Promise<PlaceData | null> {
   try {
-    const response = await client.placeDetails({
-      params: {
-        place_id: placeId,
-        fields: [
-          'formatted_phone_number',
-          'website',
-          'rating',
-          'user_ratings_total',
-          'geometry',
-          'formatted_address'
-        ],
-        key: process.env.GOOGLE_MAPS_API_KEY!,
-      },
+    const response = await fetch(`https://places.googleapis.com/v1/places/${placeId}`, {
+      headers: {
+        'X-Goog-Api-Key': GOOGLE_PLACES_API_KEY || '',
+        'X-Goog-FieldMask': 'id,displayName,formattedAddress,phoneNumber,websiteUri,rating,userRatingCount,location'
+      }
     });
 
-    if (!response.data.result) {
-      return null;
+    if (!response.ok) {
+      throw new Error('Failed to fetch place details');
     }
 
-    const place = response.data.result;
-    if (!place.place_id || !place.geometry?.location) {
+    const place = await response.json();
+    if (!place.id || !place.location) {
       console.error('Place missing required data:', place);
       return null;
     }
 
     return {
-      id: place.place_id,
-      name: place.name || '',
-      address: place.formatted_address || '',
-      phone: place.formatted_phone_number || '',
-      website: place.website || '',
+      id: place.id,
+      name: place.displayName?.text || '',
+      address: place.formattedAddress || '',
+      phone: place.phoneNumber || '',
+      website: place.websiteUri || '',
       rating: place.rating || 0,
-      reviews: place.user_ratings_total || 0,
+      reviews: place.userRatingCount || 0,
       category: '', // This will be set by the caller
       city: '', // This will be set by the caller
       state: 'florida',
       country: 'united states',
-      lat: place.geometry.location.lat,
-      lng: place.geometry.location.lng,
+      lat: place.location.latitude || 0,
+      lng: place.location.longitude || 0,
       last_updated: new Date(),
     };
   } catch (error) {

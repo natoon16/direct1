@@ -18,6 +18,8 @@ const PLACE_DETAIL_FIELDS = [
 
 type PlaceFields = typeof PLACE_DETAIL_FIELDS[number];
 
+export type { PlaceData };
+
 export async function searchPlaces(category: string, city: string): Promise<PlaceData[]> {
   try {
     console.log('Searching places with:', { category, city });
@@ -131,22 +133,29 @@ export async function getPlaceDetails(placeId: string): Promise<PlaceData | null
       return null;
     }
 
-    const result = response.data.result;
+    const place = response.data.result;
+    if (!place.place_id || !place.geometry?.location) {
+      console.error('Place missing required data:', place);
+      return null;
+    }
+
     const placeData: PlaceData = {
-      place_id: placeId,
-      name: result.name || '',
-      address: result.formatted_address || '',
-      phone: result.formatted_phone_number || '',
-      website: result.website || '',
-      rating: result.rating || 0,
-      reviews: result.user_ratings_total || 0,
-      photos: result.photos?.map(photo => photo.photo_reference) || [],
-      category: '',  // These will be filled by the caller
-      city: '',
-      state: 'Florida',
-      country: 'USA',
-      lat: result.geometry?.location?.lat || 0,
-      lng: result.geometry?.location?.lng || 0,
+      place_id: place.place_id,
+      name: place.name || '',
+      address: place.formatted_address || '',
+      phone: place.formatted_phone_number || '',
+      website: place.website || '',
+      rating: place.rating || 0,
+      reviews: place.user_ratings_total || 0,
+      photos: place.photos?.map(photo => 
+        `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photo_reference=${photo.photo_reference}&key=${process.env.GOOGLE_MAPS_API_KEY}`
+      ) || [],
+      category: '', // This will be set by the caller
+      city: '', // This will be set by the caller
+      state: 'florida',
+      country: 'united states',
+      lat: place.geometry.location.lat,
+      lng: place.geometry.location.lng,
       last_updated: new Date(),
     };
 

@@ -22,13 +22,17 @@ export default function SearchBar() {
   const cityInputRef = useRef<HTMLInputElement>(null);
 
   // Filter cities and categories based on search input
-  const filteredCities = cities.filter((city: City) => 
-    city.name.toLowerCase().includes(citySearch.toLowerCase())
-  );
+  const filteredCities = cities
+    .filter((city: City) => 
+      city.name.toLowerCase().includes(citySearch.toLowerCase())
+    )
+    .sort((a, b) => a.name.localeCompare(b.name)); // Sort cities alphabetically
 
-  const filteredCategories = categories.filter((category: Category) => 
-    category.title.toLowerCase().includes(categorySearch.toLowerCase())
-  );
+  const filteredCategories = categories
+    .filter((category: Category) => 
+      category.title.toLowerCase().includes(categorySearch.toLowerCase())
+    )
+    .sort((a, b) => a.title.localeCompare(b.title)); // Sort categories alphabetically
 
   // Handle click outside to close dropdowns
   useEffect(() => {
@@ -79,26 +83,27 @@ export default function SearchBar() {
                 setIsCityOpen(true);
               }}
               onFocus={() => setIsCityOpen(true)}
-              placeholder="Search cities..."
+              placeholder="Search from 100+ Florida cities..."
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
             {isCityOpen && (
               <div 
                 ref={cityDropdownRef}
-                className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-[400px] overflow-y-auto"
+                className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-[400px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100"
               >
                 {filteredCities.length > 0 ? (
                   filteredCities.map((city: City) => (
                     <div
                       key={city.name}
-                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center justify-between"
                       onClick={() => {
                         setSelectedCity(city.name);
                         setCitySearch('');
                         setIsCityOpen(false);
                       }}
                     >
-                      {city.name}
+                      <span>{city.name}</span>
+                      <span className="text-sm text-gray-500">{city.county} County</span>
                     </div>
                   ))
                 ) : (
@@ -122,11 +127,11 @@ export default function SearchBar() {
                 setIsCategoryOpen(true);
               }}
               onFocus={() => setIsCategoryOpen(true)}
-              placeholder="Search categories..."
+              placeholder="Search from 50+ vendor categories..."
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
             {isCategoryOpen && (
-              <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-[400px] overflow-y-auto">
+              <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-[400px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
                 {filteredCategories.length > 0 ? (
                   filteredCategories.map((category: Category) => (
                     <div

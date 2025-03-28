@@ -1,108 +1,156 @@
 export interface Vendor {
   id: string;
   name: string;
+  description: string;
   category: string;
   city: string;
-  description: string;
-  phone: string;
-  email: string;
-  website: string;
   rating: number;
   reviews: number;
+  photos: string[];
+  website?: string;
+  phone?: string;
+  address?: string;
+  location?: {
+    lat: number;
+    lng: number;
+  };
 }
 
 export const vendors: Vendor[] = [
-  // Jacksonville DJs
   {
-    id: 'jax-dj-1',
-    name: 'Elite Entertainment',
-    category: 'Wedding DJs',
-    city: 'Jacksonville',
-    description: 'Professional DJ services for weddings and special events. We bring the perfect mix of music and entertainment to make your celebration unforgettable.',
-    phone: '(904) 555-0123',
-    email: 'info@eliteentertainment.com',
-    website: 'www.eliteentertainment.com',
-    rating: 4.8,
-    reviews: 156
-  },
-  {
-    id: 'jax-dj-2',
-    name: 'Soundwave Productions',
-    category: 'Wedding DJs',
-    city: 'Jacksonville',
-    description: 'Award-winning DJ services with state-of-the-art equipment and professional MC services.',
-    phone: '(904) 555-0456',
-    email: 'book@soundwaveproductions.com',
-    website: 'www.soundwaveproductions.com',
-    rating: 4.7,
-    reviews: 98
-  },
-
-  // Jacksonville Photographers
-  {
-    id: 'jax-photo-1',
-    name: 'Captured Moments Photography',
-    category: 'Wedding Photographers',
-    city: 'Jacksonville',
-    description: 'Professional wedding photography capturing your special moments with artistic style and attention to detail.',
-    phone: '(904) 555-0789',
-    email: 'info@capturedmoments.com',
-    website: 'www.capturedmoments.com',
-    rating: 4.9,
-    reviews: 203
-  },
-
-  // Jacksonville Transportation
-  {
-    id: 'jax-trans-1',
-    name: 'Luxury Wedding Cars',
-    category: 'Wedding Transportation',
-    city: 'Jacksonville',
-    description: 'Luxury transportation services for weddings with a fleet of elegant vehicles and professional chauffeurs.',
-    phone: '(904) 555-0124',
-    email: 'book@luxuryweddingcars.com',
-    website: 'www.luxuryweddingcars.com',
-    rating: 4.8,
-    reviews: 167
-  },
-
-  // Miami Venues
-  {
-    id: 'miami-venue-1',
-    name: 'Oceanview Estate',
-    category: 'Wedding Venues',
+    id: '1',
+    name: 'Elegant Events by Sarah',
+    description: 'Professional wedding planning services in Miami',
+    category: 'Wedding Planners',
     city: 'Miami',
-    description: 'Stunning oceanfront venue with panoramic views and elegant indoor/outdoor spaces perfect for weddings.',
+    rating: 4.8,
+    reviews: 127,
+    photos: [],
+    website: 'https://elegantevents.com',
     phone: '(305) 555-0123',
-    email: 'events@oceanviewestate.com',
-    website: 'www.oceanviewestate.com',
+    address: '123 Ocean Drive, Miami, FL 33139',
+    location: {
+      lat: 25.7865,
+      lng: -80.1320
+    }
+  },
+  {
+    id: '2',
+    name: 'Tropical Blooms Florist',
+    description: 'Beautiful wedding floral arrangements in Orlando',
+    category: 'Florists',
+    city: 'Orlando',
     rating: 4.9,
-    reviews: 245
+    reviews: 89,
+    photos: [],
+    website: 'https://tropicalblooms.com',
+    phone: '(407) 555-0456',
+    address: '456 Lake Eola Drive, Orlando, FL 32801',
+    location: {
+      lat: 28.5383,
+      lng: -81.3792
+    }
   },
   {
-    id: 'miami-venue-2',
-    name: 'Tropical Gardens',
-    category: 'Wedding Venues',
-    city: 'Miami',
-    description: 'Beautiful garden venue with tropical landscaping and multiple ceremony and reception spaces.',
-    phone: '(305) 555-0456',
-    email: 'info@tropicalgardens.com',
-    website: 'www.tropicalgardens.com',
+    id: '3',
+    name: 'Sunset Photography',
+    description: 'Professional wedding photography in Tampa',
+    category: 'Photographers',
+    city: 'Tampa',
     rating: 4.7,
-    reviews: 189
+    reviews: 156,
+    photos: [],
+    website: 'https://sunsetphoto.com',
+    phone: '(813) 555-0789',
+    address: '789 Bayshore Boulevard, Tampa, FL 33606',
+    location: {
+      lat: 27.9506,
+      lng: -82.4572
+    }
   },
-
-  // Cape Coral DJs
   {
-    id: 'cape-coral-dj-1',
-    name: 'Coastal Beats Entertainment',
-    category: 'Wedding DJs',
-    city: 'Cape Coral',
-    description: 'Professional DJ services specializing in weddings and special events in the Cape Coral area.',
-    phone: '(239) 555-0123',
-    email: 'info@coastalbeats.com',
-    website: 'www.coastalbeats.com',
+    id: '4',
+    name: 'Coastal Catering',
+    description: 'Exquisite wedding catering in Jacksonville',
+    category: 'Caterers',
+    city: 'Jacksonville',
+    rating: 4.6,
+    reviews: 98,
+    photos: [],
+    website: 'https://coastalcatering.com',
+    phone: '(904) 555-0123',
+    address: '321 Riverwalk Place, Jacksonville, FL 32202',
+    location: {
+      lat: 30.3322,
+      lng: -81.6557
+    }
+  },
+  {
+    id: '5',
+    name: 'Melody Makers Band',
+    description: 'Live wedding entertainment in Fort Lauderdale',
+    category: 'Entertainment',
+    city: 'Fort Lauderdale',
     rating: 4.8,
-    reviews: 134
+    reviews: 112,
+    photos: [],
+    website: 'https://melodymakers.com',
+    phone: '(954) 555-0456',
+    address: '654 Las Olas Boulevard, Fort Lauderdale, FL 33301',
+    location: {
+      lat: 26.1224,
+      lng: -80.1373
+    }
+  },
+  {
+    id: '6',
+    name: 'Sweet Dreams Bakery',
+    description: 'Custom wedding cakes in St. Petersburg',
+    category: 'Bakers',
+    city: 'St. Petersburg',
+    rating: 4.9,
+    reviews: 145,
+    photos: [],
+    website: 'https://sweetdreams.com',
+    phone: '(727) 555-0789',
+    address: '987 Central Avenue, St. Petersburg, FL 33701',
+    location: {
+      lat: 27.7676,
+      lng: -82.6403
+    }
+  },
+  {
+    id: '7',
+    name: 'Luxury Limousine',
+    description: 'Premium wedding transportation in West Palm Beach',
+    category: 'Transportation',
+    city: 'West Palm Beach',
+    rating: 4.7,
+    reviews: 78,
+    photos: [],
+    website: 'https://luxurylimo.com',
+    phone: '(561) 555-0123',
+    address: '147 Clematis Street, West Palm Beach, FL 33401',
+    location: {
+      lat: 26.7153,
+      lng: -80.0534
+    }
+  },
+  {
+    id: '8',
+    name: 'Venue Vista',
+    description: 'Stunning wedding venues in Naples',
+    category: 'Venues',
+    city: 'Naples',
+    rating: 4.8,
+    reviews: 92,
+    photos: [],
+    website: 'https://venuevista.com',
+    phone: '(239) 555-0456',
+    address: '258 5th Avenue South, Naples, FL 34102',
+    location: {
+      lat: 26.1420,
+      lng: -81.7948
+    }
   }
 ]; 

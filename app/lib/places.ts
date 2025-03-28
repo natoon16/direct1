@@ -1,7 +1,7 @@
 import { Client } from '@googlemaps/google-maps-services-js';
 import { Place } from './models/Place';
 import { getCachedResults, cacheResults } from './mongodb';
-import { PlaceData } from './types';
+import { PlaceData } from '../types/places';
 import { Vendor } from '../data/vendors';
 import clientPromise from '../../lib/mongodb';
 
@@ -20,7 +20,12 @@ const PLACE_DETAIL_FIELDS = [
 
 type PlaceFields = typeof PLACE_DETAIL_FIELDS[number];
 
-const GOOGLE_PLACES_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY;
+const GOOGLE_PLACES_API_KEY = process.env.GOOGLE_PLACES_API_KEY;
+
+if (!GOOGLE_PLACES_API_KEY) {
+  console.error('GOOGLE_PLACES_API_KEY is not set in environment variables');
+}
+
 const GOOGLE_PLACES_API_URL = 'https://places.googleapis.com/v1/places:searchText';
 
 const SIX_MONTHS = 15778800000; // 6 months in milliseconds
@@ -47,49 +52,44 @@ export type { PlaceData };
 
 export async function searchPlaces(category: string, city: string): Promise<PlaceData[]> {
   try {
-    console.log('Searching for:', { category, city });
+    if (!GOOGLE_PLACES_API_KEY) {
+      throw new Error('Google Places API key is not configured');
+    }
 
-    // Use the API route instead of direct MongoDB access
-    const response = await fetch('/api/search', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ category, city })
-    });
+    const searchQuery = `${category} wedding vendors in ${city}, Florida`;
+    console.log('Searching with query:', searchQuery);
+
+    const response = await fetch(
+      `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(searchQuery)}&key=${GOOGLE_PLACES_API_KEY}&region=us&type=establishment`
+    );
 
     if (!response.ok) {
-      const errorData = await response.json();
-      console.error('API Error:', {
-        status: response.status,
-        error: errorData
-      });
-      throw new Error(`Failed to fetch places: ${response.status}`);
+      throw new Error(`Places API request failed: ${response.statusText}`);
     }
 
     const data = await response.json();
-    console.log('API Response:', data);
+    console.log('Places API response:', data);
 
-    if (!data.places || !Array.isArray(data.places)) {
-      console.error('Invalid API response format:', data);
+    if (data.status !== 'OK') {
+      console.error('Places API error:', data.status, data.error_message);
       return [];
     }
 
-    return data.places.map((place: any) => ({
-      id: place.id,
-      name: place.displayName?.text || '',
-      address: place.formattedAddress || '',
-      phone: place.phoneNumber || '',
-      website: place.websiteUri || '',
-      rating: place.rating || 0,
-      reviews: place.userRatingCount || 0,
-      lat: place.location?.latitude || 0,
-      lng: place.location?.longitude || 0,
-      category: category,
-      city: city,
-      state: 'florida',
-      country: 'united states',
-      last_updated: new Date()
+    return data.results.map((place: any) => ({
+      id: place.place_id,
+      name: place.name,
+      address: place.formatted_address,
+      rating: place.rating,
+      reviews: place.user_ratings_total,
+      photos: place.photos?.map((photo: any) => photo.photo_reference) || [],
+      website: place.website,
+      phone: place.formatted_phone_number,
+      location: {
+        lat: place.geometry.location.lat,
+        lng: place.geometry.location.lng,
+      },
+      category,
+      city,
     }));
   } catch (error) {
     console.error('Error in searchPlaces:', error);
@@ -101,14 +101,16 @@ export function convertPlaceToVendor(place: PlaceData, category: string, city: s
   return {
     id: place.id,
     name: place.name,
-    category,
-    city,
-    description: `Professional ${category.toLowerCase()} services in ${city}.`,
-    phone: place.phone || '(555) 555-5555',
-    email: `contact@${place.name.toLowerCase().replace(/\s+/g, '')}.com`,
-    website: place.website || `www.${place.name.toLowerCase().replace(/\s+/g, '')}.com`,
-    rating: place.rating || 4.5,
-    reviews: place.reviews || 50
+    description: `Wedding ${category} in ${city}, Florida`,
+    category: category,
+    city: city,
+    rating: place.rating,
+    reviews: place.reviews,
+    photos: place.photos,
+    website: place.website,
+    phone: place.phone,
+    address: place.address,
+    location: place.location,
   };
 }
 

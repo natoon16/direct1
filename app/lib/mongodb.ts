@@ -1,113 +1,86 @@
-import mongoose from 'mongoose';
-import { PlaceData } from './types';
+import { MongoClient, ObjectId } from 'mongodb';
+import { PlaceData } from '../types/places';
 
-const MONGODB_URI = process.env.MONGODB_URI;
-
-if (!MONGODB_URI) {
-  throw new Error('Please define the MONGODB_URI environment variable inside .env.local');
+if (!process.env.MONGODB_URI) {
+  throw new Error('Please add your Mongo URI to .env.local');
 }
 
-interface MongooseCache {
-  conn: typeof mongoose | null;
-  promise: Promise<typeof mongoose> | null;
-}
+const uri = process.env.MONGODB_URI;
+const options = {};
 
-declare global {
-  // eslint-disable-next-line no-var
-  var mongoose: MongooseCache | undefined;
-}
+let client;
+let clientPromise: Promise<MongoClient>;
 
-let cached: MongooseCache = global.mongoose || { conn: null, promise: null };
+if (process.env.NODE_ENV === 'development') {
+  // In development mode, use a global variable so that the value
+  // is preserved across module reloads caused by HMR (Hot Module Replacement).
+  let globalWithMongo = global as typeof globalThis & {
+    _mongoClientPromise?: Promise<MongoClient>;
+  };
 
-if (!cached) {
-  cached = global.mongoose = { conn: null, promise: null };
-}
-
-async function connectDB() {
-  if (cached.conn) {
-    return cached.conn;
+  if (!globalWithMongo._mongoClientPromise) {
+    client = new MongoClient(uri, options);
+    globalWithMongo._mongoClientPromise = client.connect();
   }
-
-  if (!cached.promise) {
-    const opts = {
-      bufferCommands: false,
-    };
-
-    cached.promise = mongoose.connect(MONGODB_URI!, opts).then((mongoose) => {
-      return mongoose;
-    });
-  }
-
-  try {
-    cached.conn = await cached.promise;
-  } catch (e) {
-    cached.promise = null;
-    throw e;
-  }
-
-  return cached.conn;
+  clientPromise = globalWithMongo._mongoClientPromise;
+} else {
+  // In production mode, it's best to not use a global variable.
+  client = new MongoClient(uri, options);
+  clientPromise = client.connect();
 }
 
-// Define the Place schema
-const PlaceSchema = new mongoose.Schema({
-  id: String,
-  name: String,
-  address: String,
-  phone: String,
-  website: String,
-  rating: Number,
-  reviews: Number,
-  category: String,
-  city: String,
-  state: String,
-  country: String,
-  lat: Number,
-  lng: Number,
-  last_updated: Date
-});
+// Export a module-scoped MongoClient promise. By doing this in a
+// separate module, the client can be shared across functions.
+export default clientPromise;
 
-// Create the Place model
-const Place = mongoose.models.Place || mongoose.model('Place', PlaceSchema);
+export async function getCachedResults(category: string, city: string): Promise<PlaceData[]> {
+  const client = await clientPromise;
+  const db = client.db('wedding-directory');
+  const collection = db.collection('places');
 
-export async function cacheResults(query: string, results: PlaceData[]) {
-  await connectDB();
-  
-  for (const place of results) {
-    await Place.findOneAndUpdate(
-      { id: place.id },
-      place,
-      { upsert: true }
-    );
-  }
-}
-
-export async function getCachedResults(query: string): Promise<PlaceData[]> {
-  await connectDB();
-  
-  const places = await Place.find({
-    $or: [
-      { name: { $regex: query, $options: 'i' } },
-      { category: { $regex: query, $options: 'i' } },
-      { city: { $regex: query, $options: 'i' } }
-    ]
-  });
+  const places = await collection.find({
+    category,
+    city,
+    last_updated: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) } // Last 24 hours
+  }).toArray();
 
   return places.map(place => ({
     id: place.id,
     name: place.name,
     address: place.address,
-    phone: place.phone,
-    website: place.website,
     rating: place.rating,
     reviews: place.reviews,
+    photos: place.photos || [],
+    website: place.website,
+    phone: place.phone,
+    location: {
+      lat: place.lat,
+      lng: place.lng
+    },
     category: place.category,
-    city: place.city,
-    state: place.state,
-    country: place.country,
-    lat: place.lat,
-    lng: place.lng,
-    last_updated: place.last_updated
+    city: place.city
   }));
 }
 
-export default connectDB; 
+export async function cacheResults(places: PlaceData[]): Promise<void> {
+  const client = await clientPromise;
+  const db = client.db('wedding-directory');
+  const collection = db.collection('places');
+
+  const operations = places.map(place => ({
+    updateOne: {
+      filter: { id: place.id },
+      update: {
+        $set: {
+          ...place,
+          last_updated: new Date()
+        }
+      },
+      upsert: true
+    }
+  }));
+
+  if (operations.length > 0) {
+    await collection.bulkWrite(operations);
+  }
+} 

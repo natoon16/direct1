@@ -9,6 +9,7 @@ export interface Vendor {
   photos: string[];
   website?: string;
   phone?: string;
+  email?: string;
   address?: string;
   location?: {
     lat: number;

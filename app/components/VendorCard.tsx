@@ -39,17 +39,19 @@ export default function VendorCard({ vendor }: VendorCardProps) {
           <p className="text-gray-600">
             <span className="font-medium">Email:</span> {vendor.email}
           </p>
-          <p className="text-gray-600">
-            <span className="font-medium">Website:</span>{' '}
-            <Link
-              href={vendor.website}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 hover:underline"
-            >
-              Visit Website
-            </Link>
-          </p>
+          {vendor.website && (
+            <p className="text-gray-600">
+              <span className="font-medium">Website:</span>{' '}
+              <Link
+                href={vendor.website}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:underline"
+              >
+                Visit Website
+              </Link>
+            </p>
+          )}
         </div>
 
         <Link

@@ -147,13 +147,13 @@ export async function getPlaceDetails(placeId: string): Promise<PlaceData | null
       website: place.websiteUri || '',
       rating: place.rating || 0,
       reviews: place.userRatingCount || 0,
+      photos: place.photos?.map((photo: any) => photo.photo_reference) || [],
+      location: {
+        lat: place.location.latitude || 0,
+        lng: place.location.longitude || 0,
+      },
       category: '', // This will be set by the caller
       city: '', // This will be set by the caller
-      state: 'florida',
-      country: 'united states',
-      lat: place.location.latitude || 0,
-      lng: place.location.longitude || 0,
-      last_updated: new Date(),
     };
   } catch (error) {
     console.error('Error getting place details:', error);

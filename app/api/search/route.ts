@@ -26,11 +26,14 @@ export async function POST(request: Request) {
     const { category, city } = await request.json();
 
     if (!category || !city) {
+      console.error('Missing required parameters:', { category, city });
       return NextResponse.json(
         { error: 'Category and city are required' },
         { status: 400 }
       );
     }
+
+    console.log('Searching for:', { category, city });
 
     // First, try to get from MongoDB cache
     const client = await clientPromise;
@@ -75,8 +78,14 @@ export async function POST(request: Request) {
         'X-Goog-FieldMask': 'places.displayName,places.formattedAddress,places.phoneNumber,places.websiteUri,places.rating,places.userRatingCount,places.location'
       },
       body: JSON.stringify({
-        textQuery: `${category} in ${city}, Florida`,
-        pageSize: 20
+        textQuery: `${category} wedding vendors in ${city}, Florida`,
+        pageSize: 20,
+        locationRestriction: {
+          rectangle: {
+            low: { latitude: 24.396308, longitude: -87.634896 }, // SW Florida
+            high: { latitude: 31.000888, longitude: -79.974306 }  // NE Florida
+          }
+        }
       })
     });
 

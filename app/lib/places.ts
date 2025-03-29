@@ -139,7 +139,13 @@ export async function searchPlaces(category: string, city: string): Promise<Vend
   }
 }
 
-export function convertPlaceToVendor(place: PlaceData, category: string, city: string): Vendor {
+export function convertPlaceToVendor(place: PlaceData | Vendor, category: string, city: string): Vendor {
+  // If it's already a Vendor, just return it
+  if ('placeId' in place) {
+    return place as Vendor;
+  }
+
+  // If it's a PlaceData, convert it
   return {
     id: place.id,
     name: place.name,
@@ -153,7 +159,7 @@ export function convertPlaceToVendor(place: PlaceData, category: string, city: s
     rating: place.rating || 0,
     reviewCount: place.reviewCount || 0,
     businessStatus: place.businessStatus || 'OPERATIONAL',
-    placeId: place.placeId
+    placeId: place.id
   };
 }
 

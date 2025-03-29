@@ -52,20 +52,135 @@ export type { PlaceData };
 
 export async function searchPlaces(category: string, city: string): Promise<PlaceData[]> {
   try {
-    const response = await fetch('/api/places/search', {
+    // First try to get from MongoDB cache
+    const cachedResults = await getCachedResults(category, city);
+    if (cachedResults && cachedResults.length > 0) {
+      console.log('Found cached results:', cachedResults.length);
+      return cachedResults;
+    }
+
+    if (!GOOGLE_PLACES_API_KEY) {
+      throw new Error('Google Places API key is not configured');
+    }
+
+    // First try with a more specific wedding vendor search
+    const searchQuery = `${category} wedding services in ${city}, Florida`;
+    console.log('Searching with query:', searchQuery);
+
+    const response = await fetch(GOOGLE_PLACES_API_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'X-Goog-Api-Key': GOOGLE_PLACES_API_KEY,
+        'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.rating,places.userRatingCount,places.photos,places.websiteUri,places.phoneNumber,places.location',
       },
-      body: JSON.stringify({ category, city })
+      body: JSON.stringify({
+        textQuery: searchQuery,
+        locationBias: {
+          circle: {
+            center: {
+              latitude: 27.6648, // Florida's approximate center
+              longitude: -81.5158,
+            },
+            radius: 500000, // 500km radius to cover Florida
+          },
+        },
+        type: 'establishment',
+      }),
     });
 
     if (!response.ok) {
-      throw new Error(`API request failed: ${response.statusText}`);
+      throw new Error(`Places API request failed: ${response.statusText}`);
     }
 
     const data = await response.json();
-    return data.places || [];
+    console.log('Places API response:', data);
+
+    if (!data.places || !Array.isArray(data.places)) {
+      console.error('Invalid API response format:', data);
+      return [];
+    }
+
+    // If no results, try a broader search
+    if (data.places.length === 0) {
+      const broaderQuery = `${category} in ${city}, Florida`;
+      console.log('Trying broader search with query:', broaderQuery);
+
+      const broaderResponse = await fetch(GOOGLE_PLACES_API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Goog-Api-Key': GOOGLE_PLACES_API_KEY,
+          'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.rating,places.userRatingCount,places.photos,places.websiteUri,places.phoneNumber,places.location',
+        },
+        body: JSON.stringify({
+          textQuery: broaderQuery,
+          locationBias: {
+            circle: {
+              center: {
+                latitude: 27.6648,
+                longitude: -81.5158,
+              },
+              radius: 500000,
+            },
+          },
+          type: 'establishment',
+        }),
+      });
+
+      if (!broaderResponse.ok) {
+        throw new Error(`Places API request failed: ${broaderResponse.statusText}`);
+      }
+
+      const broaderData = await broaderResponse.json();
+      console.log('Broader search response:', broaderData);
+
+      if (!broaderData.places || !Array.isArray(broaderData.places)) {
+        return [];
+      }
+
+      const places = broaderData.places.map((place: any) => ({
+        id: place.id,
+        name: place.displayName?.text || '',
+        address: place.formattedAddress || '',
+        rating: place.rating || 0,
+        reviews: place.userRatingCount || 0,
+        photos: place.photos?.map((photo: any) => photo.photo_reference) || [],
+        website: place.websiteUri || '',
+        phone: place.phoneNumber || '',
+        location: {
+          lat: place.location?.latitude || 0,
+          lng: place.location?.longitude || 0,
+        },
+        category,
+        city,
+      }));
+
+      // Cache the results
+      await cacheResults(places);
+      return places;
+    }
+
+    const places = data.places.map((place: any) => ({
+      id: place.id,
+      name: place.displayName?.text || '',
+      address: place.formattedAddress || '',
+      rating: place.rating || 0,
+      reviews: place.userRatingCount || 0,
+      photos: place.photos?.map((photo: any) => photo.photo_reference) || [],
+      website: place.websiteUri || '',
+      phone: place.phoneNumber || '',
+      location: {
+        lat: place.location?.latitude || 0,
+        lng: place.location?.longitude || 0,
+      },
+      category,
+      city,
+    }));
+
+    // Cache the results
+    await cacheResults(places);
+    return places;
   } catch (error) {
     console.error('Error in searchPlaces:', error);
     return [];

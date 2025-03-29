@@ -125,16 +125,16 @@ export async function searchPlaces(category: string, city: string): Promise<Vend
 
       // Cache the results
       if (vendors.length > 0) {
-        await collection.insertMany(
-          vendors.map(vendor => ({
-            ...vendor,
-            createdAt: new Date(),
-            expiresAt: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000) // 180 days cache
-          }))
-        );
+        const vendorsWithDates = vendors.map(vendor => ({
+          ...vendor,
+          createdAt: new Date(),
+          expiresAt: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000) // 180 days cache
+        }));
+        await collection.insertMany(vendorsWithDates);
+        return vendorsWithDates;
       }
 
-      return vendors;
+      return [];
     }
 
     return [];

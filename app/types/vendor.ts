@@ -18,4 +18,6 @@ export interface Vendor {
     lat: number;
     lng: number;
   };
+  createdAt?: Date;
+  expiresAt?: Date;
 } 

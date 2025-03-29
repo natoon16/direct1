@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { searchPlaces } from '../lib/places';
 import VendorCard from '../components/VendorCard';
 import { Vendor } from '../types/vendor';
 import { categories } from '../data/categories';
 import { cities } from '../data/cities';
+import { searchVendors } from '../actions/search';
 
 export default function SearchResults() {
   const searchParams = useSearchParams();
@@ -42,10 +42,14 @@ export default function SearchResults() {
         }
 
         console.log('Searching for:', { category: categoryName, city: cityName });
-        const places = await searchPlaces(categoryName, cityName);
-        console.log('Found places:', places.length);
+        const result = await searchVendors(categoryName, cityName);
+        
+        if (!result.success || !result.data) {
+          throw new Error(result.error);
+        }
 
-        setVendors(places);
+        console.log('Found places:', result.data.length);
+        setVendors(result.data);
       } catch (err) {
         console.error('Error fetching vendors:', err);
         setError('Failed to load vendors. Please try again.');

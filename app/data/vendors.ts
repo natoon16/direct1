@@ -6,12 +6,10 @@ export interface Vendor {
   city: string;
   rating: number;
   reviews: number;
-  photos: string[];
-  website?: string;
-  phone?: string;
-  email?: string;
-  address?: string;
-  location?: {
+  website: string;
+  phone: string;
+  address: string;
+  location: {
     lat: number;
     lng: number;
   };
@@ -26,7 +24,6 @@ export const vendors: Vendor[] = [
     city: 'Miami',
     rating: 4.8,
     reviews: 127,
-    photos: [],
     website: 'https://elegantevents.com',
     phone: '(305) 555-0123',
     address: '123 Ocean Drive, Miami, FL 33139',
@@ -43,7 +40,6 @@ export const vendors: Vendor[] = [
     city: 'Orlando',
     rating: 4.9,
     reviews: 89,
-    photos: [],
     website: 'https://tropicalblooms.com',
     phone: '(407) 555-0456',
     address: '456 Lake Eola Drive, Orlando, FL 32801',
@@ -60,7 +56,6 @@ export const vendors: Vendor[] = [
     city: 'Tampa',
     rating: 4.7,
     reviews: 156,
-    photos: [],
     website: 'https://sunsetphoto.com',
     phone: '(813) 555-0789',
     address: '789 Bayshore Boulevard, Tampa, FL 33606',
@@ -77,7 +72,6 @@ export const vendors: Vendor[] = [
     city: 'Jacksonville',
     rating: 4.6,
     reviews: 98,
-    photos: [],
     website: 'https://coastalcatering.com',
     phone: '(904) 555-0123',
     address: '321 Riverwalk Place, Jacksonville, FL 32202',
@@ -94,7 +88,6 @@ export const vendors: Vendor[] = [
     city: 'Fort Lauderdale',
     rating: 4.8,
     reviews: 112,
-    photos: [],
     website: 'https://melodymakers.com',
     phone: '(954) 555-0456',
     address: '654 Las Olas Boulevard, Fort Lauderdale, FL 33301',
@@ -111,7 +104,6 @@ export const vendors: Vendor[] = [
     city: 'St. Petersburg',
     rating: 4.9,
     reviews: 145,
-    photos: [],
     website: 'https://sweetdreams.com',
     phone: '(727) 555-0789',
     address: '987 Central Avenue, St. Petersburg, FL 33701',
@@ -128,7 +120,6 @@ export const vendors: Vendor[] = [
     city: 'West Palm Beach',
     rating: 4.7,
     reviews: 78,
-    photos: [],
     website: 'https://luxurylimo.com',
     phone: '(561) 555-0123',
     address: '147 Clematis Street, West Palm Beach, FL 33401',
@@ -145,7 +136,6 @@ export const vendors: Vendor[] = [
     city: 'Naples',
     rating: 4.8,
     reviews: 92,
-    photos: [],
     website: 'https://venuevista.com',
     phone: '(239) 555-0456',
     address: '258 5th Avenue South, Naples, FL 34102',

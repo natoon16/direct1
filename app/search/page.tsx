@@ -4,6 +4,7 @@ import SearchForm from '../components/SearchForm';
 import VendorResults from '../components/VendorResults';
 import { categories } from '../data/categories';
 import { cities } from '../data/cities';
+import SearchResults from './SearchResults';
 
 type SearchPageProps = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -33,40 +34,11 @@ export async function generateMetadata({ searchParams }: SearchPageProps): Promi
   };
 }
 
-export default async function SearchPage({ searchParams }: SearchPageProps) {
-  const params = await searchParams;
-  const category = params.category as string;
-  const city = params.city as string;
-
+export default function SearchPage() {
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">
-            {category && city
-              ? `${categories.find(c => c.slug === category)?.name} in ${cities.find(c => c.slug === city)?.name}, FL`
-              : 'Search Wedding Vendors'}
-          </h1>
-          <SearchForm />
-        </div>
-
-        <Suspense fallback={
-          <div className="text-center py-12">
-            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-purple-600 border-r-transparent"></div>
-            <p className="mt-4 text-gray-600">Loading vendors...</p>
-          </div>
-        }>
-          {category && city ? (
-            <VendorResults category={category} city={city} />
-          ) : (
-            <div className="text-center py-12">
-              <p className="text-gray-600">
-                Please select a category and city to see wedding vendors.
-              </p>
-            </div>
-          )}
-        </Suspense>
-      </div>
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold text-gray-900 mb-8">Search Results</h1>
+      <SearchResults />
     </div>
   );
 } 

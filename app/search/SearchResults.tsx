@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { searchPlaces, convertPlaceToVendor } from '../lib/places';
+import { searchPlaces } from '../lib/places';
 import VendorCard from '../components/VendorCard';
 import { Vendor } from '../types/vendor';
+import { categories } from '../data/categories';
+import { cities } from '../data/cities';
 
 export default function SearchResults() {
   const searchParams = useSearchParams();
@@ -31,8 +33,16 @@ export default function SearchResults() {
           return;
         }
 
-        console.log('Searching for:', { category, city });
-        const places = await searchPlaces(category, city);
+        const categoryName = categories.find(c => c.slug === category)?.name;
+        const cityName = cities.find(c => c.slug === city)?.name;
+
+        if (!categoryName || !cityName) {
+          setError('Invalid category or city selected');
+          return;
+        }
+
+        console.log('Searching for:', { category: categoryName, city: cityName });
+        const places = await searchPlaces(categoryName, cityName);
         console.log('Found places:', places.length);
 
         setVendors(places);

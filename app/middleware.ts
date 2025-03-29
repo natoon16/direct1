@@ -1,39 +1,36 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-// Rate limiting configuration
-const RATE_LIMIT = 10; // requests per minute
-const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute in milliseconds
-
-// Store for rate limiting
-const rateLimitStore = new Map<string, { count: number; timestamp: number }>();
+// In-memory rate limiting store
+const rateLimit = new Map<string, { count: number; timestamp: number }>();
+const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
+const MAX_REQUESTS = 60; // 60 requests per minute
 
 export function middleware(request: NextRequest) {
   // Only apply rate limiting to API routes
   if (request.nextUrl.pathname.startsWith('/api/')) {
-    const ip = request.ip ?? 'anonymous';
+    // Get IP from headers
+    const forwardedFor = request.headers.get('x-forwarded-for');
+    const ip = forwardedFor ? forwardedFor.split(',')[0] : 'anonymous';
     const now = Date.now();
 
     // Get or create rate limit entry
-    const rateLimit = rateLimitStore.get(ip);
-    if (!rateLimit) {
-      rateLimitStore.set(ip, { count: 1, timestamp: now });
+    const rateLimitEntry = rateLimit.get(ip);
+    if (!rateLimitEntry) {
+      rateLimit.set(ip, { count: 1, timestamp: now });
     } else {
       // Reset if window has passed
-      if (now - rateLimit.timestamp > RATE_LIMIT_WINDOW) {
-        rateLimit.count = 1;
-        rateLimit.timestamp = now;
+      if (now - rateLimitEntry.timestamp > RATE_LIMIT_WINDOW) {
+        rateLimit.set(ip, { count: 1, timestamp: now });
       } else {
-        rateLimit.count++;
-      }
-
-      // Check if rate limit exceeded
-      if (rateLimit.count > RATE_LIMIT) {
-        console.warn(`Rate limit exceeded for IP: ${ip}`);
-        return NextResponse.json(
-          { error: 'Too many requests. Please try again later.' },
-          { status: 429 }
-        );
+        // Check if rate limit exceeded
+        if (rateLimitEntry.count >= MAX_REQUESTS) {
+          return NextResponse.json(
+            { error: 'Too many requests. Please try again later.' },
+            { status: 429 }
+          );
+        }
+        rateLimitEntry.count++;
       }
     }
   }

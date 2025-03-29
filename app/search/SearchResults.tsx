@@ -15,19 +15,37 @@ export default function SearchResults() {
   useEffect(() => {
     if (!searchParams) return;
 
-    const category = searchParams.get('category');
-    const city = searchParams.get('city');
-
-    if (category && city) {
-      handleSearch(category, city);
+    const query = searchParams.get('q');
+    if (query) {
+      handleSearch(query);
     }
   }, [searchParams]);
 
-  const handleSearch = async (category: string, city: string) => {
+  const handleSearch = async (query: string) => {
     try {
       setLoading(true);
       setError(null);
-      console.log('Searching for:', { category, city });
+      console.log('Searching for:', query);
+
+      // Extract category and city from the search query
+      const words = query.toLowerCase().split(' ');
+      const cityIndex = words.findIndex(word => 
+        ['in', 'at', 'near', 'around'].includes(word)
+      );
+
+      let category = '';
+      let city = '';
+
+      if (cityIndex !== -1) {
+        category = words.slice(0, cityIndex).join(' ');
+        city = words.slice(cityIndex + 1).join(' ');
+      } else {
+        // If no location specified, search in all major Florida cities
+        category = query;
+        city = 'Florida';
+      }
+
+      console.log('Extracted search params:', { category, city });
 
       const places = await searchPlaces(category, city);
       console.log('Found places:', places.length);
@@ -71,7 +89,7 @@ export default function SearchResults() {
 
       {!loading && !error && vendors.length === 0 && (
         <div className="text-center py-12">
-          <p className="text-gray-600">No vendors found. Please try a different category or city.</p>
+          <p className="text-gray-600">No vendors found. Try searching with a location, e.g., "wedding photographers in Miami"</p>
         </div>
       )}
     </div>

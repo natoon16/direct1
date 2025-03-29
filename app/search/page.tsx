@@ -1,19 +1,16 @@
 import { Metadata } from 'next';
-import { Suspense } from 'react';
 import SearchForm from '../components/SearchForm';
-import VendorResults from '../components/VendorResults';
+import SearchResults from './SearchResults';
 import { categories } from '../data/categories';
 import { cities } from '../data/cities';
-import SearchResults from './SearchResults';
 
 type SearchPageProps = {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+  searchParams: { [key: string]: string | string[] | undefined };
 };
 
 export async function generateMetadata({ searchParams }: SearchPageProps): Promise<Metadata> {
-  const params = await searchParams;
-  const category = categories.find(c => c.slug === params.category as string);
-  const city = cities.find(c => c.slug === params.city as string);
+  const category = categories.find(c => c.slug === searchParams.category as string);
+  const city = cities.find(c => c.slug === searchParams.city as string);
 
   const title = category && city
     ? `${category.name} in ${city.name}, FL | Wedding Directory Florida`
@@ -36,15 +33,22 @@ export async function generateMetadata({ searchParams }: SearchPageProps): Promi
 
 export const dynamic = 'force-dynamic';
 
-export default function SearchPage() {
+export default function SearchPage({ searchParams }: SearchPageProps) {
+  const category = searchParams.category as string;
+  const city = searchParams.city as string;
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">Search Wedding Vendors</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-4">
+            {category && city
+              ? `${categories.find(c => c.slug === category)?.name} in ${cities.find(c => c.slug === city)?.name}, FL`
+              : 'Search Wedding Vendors'}
+          </h1>
           <SearchForm />
         </div>
-        <SearchResults />
+        <SearchResults category={category} city={city} />
       </div>
     </div>
   );

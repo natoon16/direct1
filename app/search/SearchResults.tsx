@@ -1,15 +1,18 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
 import VendorCard from '../components/VendorCard';
 import { Vendor } from '../types/vendor';
 import { categories } from '../data/categories';
 import { cities } from '../data/cities';
 import { searchVendors } from '../actions/search';
 
-export default function SearchResults() {
-  const searchParams = useSearchParams();
+type SearchResultsProps = {
+  category?: string;
+  city?: string;
+};
+
+export default function SearchResults({ category, city }: SearchResultsProps) {
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -17,19 +20,12 @@ export default function SearchResults() {
   useEffect(() => {
     async function fetchVendors() {
       try {
-        setLoading(true);
-        setError(null);
-
-        if (!searchParams) {
-          return;
-        }
-
-        const category = searchParams.get('category');
-        const city = searchParams.get('city');
-
         if (!category || !city) {
           return;
         }
+
+        setLoading(true);
+        setError(null);
 
         const categoryName = categories.find(c => c.slug === category)?.name;
         const cityName = cities.find(c => c.slug === city)?.name;
@@ -57,7 +53,7 @@ export default function SearchResults() {
     }
 
     fetchVendors();
-  }, [searchParams]);
+  }, [category, city]);
 
   if (loading) {
     return (
@@ -76,7 +72,7 @@ export default function SearchResults() {
     );
   }
 
-  if (!searchParams?.get('category') || !searchParams?.get('city')) {
+  if (!category || !city) {
     return (
       <div className="text-center py-12">
         <p className="text-gray-600">Please select a category and city to search for vendors.</p>

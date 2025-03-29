@@ -5,11 +5,17 @@ export interface Vendor {
   address: string;
   city: string;
   state: string;
-  phone?: string;
-  email?: string;
-  website?: string;
-  rating?: number;
-  reviewCount?: number;
-  businessStatus?: 'OPERATIONAL' | 'CLOSED_TEMPORARILY' | 'CLOSED_PERMANENTLY';
+  phone: string;
+  email: string;
+  website: string;
+  rating: number;
+  reviewCount: number;
+  businessStatus: 'OPERATIONAL' | 'CLOSED_TEMPORARILY' | 'CLOSED_PERMANENTLY';
   placeId: string;
+  description: string;
+  reviews: number;
+  location: {
+    lat: number;
+    lng: number;
+  };
 } 

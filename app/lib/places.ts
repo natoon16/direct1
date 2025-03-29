@@ -160,7 +160,13 @@ export function convertPlaceToVendor(place: PlaceData | Vendor, category: string
     rating: placeData.rating || 0,
     reviewCount: placeData.reviewCount || 0,
     businessStatus: (placeData.businessStatus as Vendor['businessStatus']) || 'OPERATIONAL',
-    placeId: placeData.id
+    placeId: placeData.id,
+    description: `Wedding ${category} in ${city}, Florida`,
+    reviews: placeData.reviewCount || 0,
+    location: {
+      lat: 0, // We don't need location data
+      lng: 0
+    }
   };
 }
 

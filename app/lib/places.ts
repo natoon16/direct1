@@ -49,19 +49,6 @@ interface PlaceSearchResponse {
   error_message?: string;
 }
 
-interface PlaceDetailsResponse {
-  id: string;
-  displayName: {
-    text: string;
-  };
-  formattedAddress: string;
-  phoneNumber?: string;
-  websiteUri?: string;
-  rating?: number;
-  userRatingCount?: number;
-  businessStatus?: string;
-}
-
 export type { PlaceData };
 
 export async function searchPlaces(category: string, city: string): Promise<Vendor[]> {
@@ -159,20 +146,21 @@ export function convertPlaceToVendor(place: PlaceData | Vendor, category: string
   }
 
   // If it's a PlaceData, convert it
+  const placeData = place as PlaceData;
   return {
-    id: place.id,
-    name: place.name,
+    id: placeData.id,
+    name: placeData.name,
     category,
-    address: place.address,
+    address: placeData.address,
     city,
     state: 'FL',
-    phone: place.phone || '',
-    email: place.email || '',
-    website: place.website || '',
-    rating: place.rating || 0,
-    reviewCount: place.reviewCount || 0,
-    businessStatus: place.businessStatus || 'OPERATIONAL',
-    placeId: place.id
+    phone: placeData.phone || '',
+    email: placeData.email || '',
+    website: placeData.website || '',
+    rating: placeData.rating || 0,
+    reviewCount: placeData.reviewCount || 0,
+    businessStatus: (placeData.businessStatus as Vendor['businessStatus']) || 'OPERATIONAL',
+    placeId: placeData.id
   };
 }
 
@@ -195,7 +183,7 @@ export async function getPlaceDetails(placeId: string): Promise<PlaceData | null
       throw new Error('Failed to fetch place details');
     }
 
-    const place: PlaceDetailsResponse = await response.json();
+    const place = await response.json();
     if (!place.id) {
       console.error('Place missing required data:', place);
       return null;

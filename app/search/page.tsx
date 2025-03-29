@@ -5,13 +5,12 @@ import { categories } from '../data/categories';
 import { cities } from '../data/cities';
 
 type SearchPageProps = {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+  searchParams: { [key: string]: string | string[] | undefined };
 };
 
 export async function generateMetadata({ searchParams }: SearchPageProps): Promise<Metadata> {
-  const params = await searchParams;
-  const category = categories.find(c => c.slug === params.category as string);
-  const city = cities.find(c => c.slug === params.city as string);
+  const category = categories.find(c => c.slug === searchParams.category as string);
+  const city = cities.find(c => c.slug === searchParams.city as string);
 
   const title = category && city
     ? `${category.name} in ${city.name}, FL | Wedding Directory Florida`
@@ -34,10 +33,9 @@ export async function generateMetadata({ searchParams }: SearchPageProps): Promi
 
 export const dynamic = 'force-dynamic';
 
-export default async function SearchPage({ searchParams }: SearchPageProps) {
-  const params = await searchParams;
-  const category = params.category as string;
-  const city = params.city as string;
+export default function SearchPage({ searchParams }: SearchPageProps) {
+  const category = searchParams.category as string;
+  const city = searchParams.city as string;
 
   return (
     <div className="min-h-screen bg-gray-50">

@@ -13,12 +13,12 @@ export default function SearchForm() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (category && city) {
-      router.push(`/search?category=${category}&city=${city}`);
+      router.push(`/search?category=${encodeURIComponent(category)}&city=${encodeURIComponent(city)}`);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="w-full max-w-3xl mx-auto">
+    <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
@@ -33,13 +33,12 @@ export default function SearchForm() {
           >
             <option value="">Select a category</option>
             {categories.map((cat) => (
-              <option key={cat.id} value={cat.slug}>
+              <option key={cat.slug} value={cat.slug}>
                 {cat.name}
               </option>
             ))}
           </select>
         </div>
-
         <div>
           <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">
             City
@@ -53,22 +52,19 @@ export default function SearchForm() {
           >
             <option value="">Select a city</option>
             {cities.map((c) => (
-              <option key={c.id} value={c.slug}>
-                {c.name}, {c.county} County
+              <option key={c.slug} value={c.slug}>
+                {c.name}
               </option>
             ))}
           </select>
         </div>
       </div>
-
-      <div className="mt-4">
-        <button
-          type="submit"
-          className="w-full md:w-auto px-6 py-3 bg-purple-600 text-white font-medium rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors"
-        >
-          Search Vendors
-        </button>
-      </div>
+      <button
+        type="submit"
+        className="w-full md:w-auto px-6 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+      >
+        Search
+      </button>
     </form>
   );
 }

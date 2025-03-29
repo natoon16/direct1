@@ -49,6 +49,19 @@ interface PlaceSearchResponse {
   error_message?: string;
 }
 
+interface PlaceDetailsResponse {
+  id: string;
+  displayName: {
+    text: string;
+  };
+  formattedAddress: string;
+  phoneNumber?: string;
+  websiteUri?: string;
+  rating?: number;
+  userRatingCount?: number;
+  businessStatus?: string;
+}
+
 export type { PlaceData };
 
 export async function searchPlaces(category: string, city: string): Promise<Vendor[]> {
@@ -182,7 +195,7 @@ export async function getPlaceDetails(placeId: string): Promise<PlaceData | null
       throw new Error('Failed to fetch place details');
     }
 
-    const place = await response.json();
+    const place: PlaceDetailsResponse = await response.json();
     if (!place.id) {
       console.error('Place missing required data:', place);
       return null;

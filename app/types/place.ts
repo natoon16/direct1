@@ -6,10 +6,6 @@ export interface Place {
   website: string;
   rating: number;
   reviews: number;
-  location: {
-    lat: number;
-    lng: number;
-  };
   category: string;
   city: string;
   businessStatus: string;
@@ -21,4 +17,18 @@ export interface Place {
   };
   priceLevel?: number;
   types?: string[];
+}
+
+export interface PlaceData {
+  id: string;
+  name: string;
+  address: string;
+  reviews: number;
+  businessStatus?: string;
+  rating?: number;
+  reviewCount?: number;
+  phone?: string;
+  email?: string;
+  website?: string;
+  placeId: string;
 } 

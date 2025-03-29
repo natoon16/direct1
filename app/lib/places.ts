@@ -14,7 +14,6 @@ const PLACE_DETAIL_FIELDS = [
   'reviews',
   'rating',
   'user_ratings_total',
-  'geometry',
   'formatted_address',
 ] as const;
 
@@ -140,12 +139,21 @@ export async function searchPlaces(category: string, city: string): Promise<Vend
   }
 }
 
-export function convertPlaceToVendor(place: Place, category: string, city: string) {
+export function convertPlaceToVendor(place: PlaceData, category: string, city: string): Vendor {
   return {
-    ...place,
-    description: `Wedding ${category} in ${city}, Florida`,
-    createdAt: new Date(),
-    updatedAt: new Date(),
+    id: place.id,
+    name: place.name,
+    category,
+    address: place.address,
+    city,
+    state: 'FL',
+    phone: place.phone || '',
+    email: place.email || '',
+    website: place.website || '',
+    rating: place.rating || 0,
+    reviewCount: place.reviewCount || 0,
+    businessStatus: place.businessStatus || 'OPERATIONAL',
+    placeId: place.placeId
   };
 }
 
@@ -169,7 +177,7 @@ export async function getPlaceDetails(placeId: string): Promise<PlaceData | null
     }
 
     const place = await response.json();
-    if (!place.id || !place.location) {
+    if (!place.id) {
       console.error('Place missing required data:', place);
       return null;
     }
@@ -182,10 +190,6 @@ export async function getPlaceDetails(placeId: string): Promise<PlaceData | null
       website: place.websiteUri || '',
       rating: place.rating || 0,
       reviews: place.userRatingCount || 0,
-      location: {
-        lat: place.location.latitude || 0,
-        lng: place.location.longitude || 0,
-      },
       category: '', // This will be set by the caller
       city: '', // This will be set by the caller
     };

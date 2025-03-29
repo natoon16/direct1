@@ -190,14 +190,15 @@ export async function getPlaceDetails(placeId: string): Promise<PlaceData | null
 
     return {
       id: place.id,
+      placeId: place.id,
       name: place.displayName?.text || '',
       address: place.formattedAddress || '',
       phone: place.phoneNumber || '',
       website: place.websiteUri || '',
       rating: place.rating || 0,
-      reviews: place.userRatingCount || 0,
-      category: '', // This will be set by the caller
-      city: '', // This will be set by the caller
+      reviewCount: place.userRatingCount || 0,
+      businessStatus: place.businessStatus || 'OPERATIONAL',
+      email: ''
     };
   } catch (error) {
     console.error('Error getting place details:', error);

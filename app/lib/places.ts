@@ -109,11 +109,18 @@ export async function searchPlaces(category: string, city: string): Promise<Vend
         address: place.formattedAddress,
         city,
         state: 'FL',
-        phone: place.phoneNumbers?.[0],
-        website: place.websiteUri,
-        rating: place.rating,
-        reviewCount: place.userRatingCount,
-        businessStatus: place.businessStatus as Vendor['businessStatus']
+        phone: place.phoneNumbers?.[0] || '',
+        website: place.websiteUri || '',
+        email: '', // Not available from Places API
+        rating: place.rating || 0,
+        reviewCount: place.userRatingCount || 0,
+        businessStatus: (place.businessStatus as Vendor['businessStatus']) || 'OPERATIONAL',
+        description: `Wedding ${category} in ${city}, Florida`,
+        reviews: place.userRatingCount || 0,
+        location: {
+          lat: 0, // Not needed
+          lng: 0
+        }
       }));
 
       // Cache the results

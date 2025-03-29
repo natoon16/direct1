@@ -9,14 +9,15 @@ import { searchPlaces, convertPlaceToVendor } from '../../lib/places';
 import VendorCard from '../../components/VendorCard';
 import { PlaceData } from '../../types/places';
 
-interface Props {
-  params: {
+interface PageProps {
+  params: Promise<{
     category: string;
-  };
+  }>;
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const category = categories.find(c => c.slug === params.category);
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const resolvedParams = await params;
+  const category = categories.find(c => c.slug === resolvedParams.category);
   if (!category) {
     return {
       title: 'Category Not Found',
@@ -30,8 +31,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function CategoryPage({ params }: Props) {
-  const category = categories.find(c => c.slug === params.category);
+export default async function CategoryPage({ params }: PageProps) {
+  const resolvedParams = await params;
+  const category = categories.find(c => c.slug === resolvedParams.category);
   if (!category) {
     notFound();
   }

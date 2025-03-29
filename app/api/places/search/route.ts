@@ -202,7 +202,7 @@ export async function POST(request: Request) {
       }));
 
       // Cache the results
-      await cacheResults(places);
+      await cacheResults(places, normalizedCategory, normalizedCity);
       return NextResponse.json({ places });
     }
 
@@ -223,7 +223,7 @@ export async function POST(request: Request) {
     }));
 
     // Cache the results
-    await cacheResults(places);
+    await cacheResults(places, normalizedCategory, normalizedCity);
     return NextResponse.json({ places });
   } catch (error) {
     console.error('Search API error:', error);

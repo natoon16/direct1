@@ -10,7 +10,6 @@ const client = new Client({});
 const PLACE_DETAIL_FIELDS = [
   'formatted_phone_number',
   'website',
-  'photos',
   'reviews',
   'rating',
   'user_ratings_total',
@@ -76,16 +75,15 @@ export function convertPlaceToVendor(place: PlaceData, category: string, city: s
   return {
     id: place.id,
     name: place.name,
-    description: `Wedding ${category} in ${city}, Florida`,
-    category: category,
-    city: city,
+    category,
+    city,
     rating: place.rating,
     reviews: place.reviews,
-    photos: place.photos,
     website: place.website,
     phone: place.phone,
     address: place.address,
     location: place.location,
+    description: `Wedding ${category} in ${city}, Florida`,
   };
 }
 
@@ -122,7 +120,6 @@ export async function getPlaceDetails(placeId: string): Promise<PlaceData | null
       website: place.websiteUri || '',
       rating: place.rating || 0,
       reviews: place.userRatingCount || 0,
-      photos: place.photos?.map((photo: any) => photo.photo_reference) || [],
       location: {
         lat: place.location.latitude || 0,
         lng: place.location.longitude || 0,

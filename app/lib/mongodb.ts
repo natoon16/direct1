@@ -1,5 +1,6 @@
 import { MongoClient, ObjectId } from 'mongodb';
 import { PlaceData } from '../types/places';
+import { Place } from '../types/place';
 
 if (!process.env.MONGODB_URI) {
   throw new Error('Please add your Mongo URI to .env.local');
@@ -33,96 +34,63 @@ if (process.env.NODE_ENV === 'development') {
   clientPromise = client.connect();
 }
 
-export interface CachedVendor {
+const SIX_MONTHS = 15778800000; // 6 months in milliseconds
+
+interface CachedResult {
   _id?: string;
-  placeId?: string;
-  name: string;
-  address: string;
-  phone?: string;
-  website?: string;
-  rating?: number;
-  reviews?: number;
-  location?: {
-    latitude: number;
-    longitude: number;
-  };
-  category?: string;
+  category: string;
   city: string;
-  lastUpdated: Date;
+  places: Place[];
+  createdAt: Date;
+  updatedAt: Date;
 }
 
-export async function getCachedResults(category: string, city: string): Promise<PlaceData[]> {
+export async function getCachedResults(category: string, city: string): Promise<Place[] | null> {
   try {
     const client = await clientPromise;
-    const db = client.db();
-    const collection = db.collection<CachedVendor>('vendors');
+    const db = client.db('weddingdirectory');
+    const collection = db.collection('cached_results');
 
-    const query = {
-      category: category.toLowerCase(),
-      city: city.toLowerCase(),
-      lastUpdated: { $gt: new Date(Date.now() - 15778800000) } // 6 months
-    };
+    const result = await collection.findOne({
+      category,
+      city,
+      updatedAt: { $gt: new Date(Date.now() - SIX_MONTHS) },
+    });
 
-    console.log('MongoDB query:', query);
+    if (result) {
+      console.log('Found cached results for:', category, city);
+      return result.places;
+    }
 
-    const vendors = await collection.find(query).toArray();
-    console.log('Found vendors in MongoDB:', vendors.length);
-
-    return vendors.map(vendor => ({
-      id: vendor.placeId || vendor._id || '',
-      name: vendor.name,
-      address: vendor.address,
-      phone: vendor.phone || '',
-      website: vendor.website || '',
-      rating: vendor.rating || 0,
-      reviews: vendor.reviews || 0,
-      photos: [], // We don't cache photos
-      location: vendor.location ? {
-        lat: vendor.location.latitude,
-        lng: vendor.location.longitude
-      } : { lat: 0, lng: 0 },
-      category: vendor.category || '',
-      city: vendor.city
-    }));
+    return null;
   } catch (error) {
-    console.error('MongoDB error:', error);
-    return [];
+    console.error('Error getting cached results:', error);
+    return null;
   }
 }
 
-export async function cacheResults(places: PlaceData[]): Promise<void> {
+export async function cacheResults(places: Place[], category: string, city: string): Promise<void> {
   try {
     const client = await clientPromise;
-    const db = client.db();
-    const collection = db.collection<CachedVendor>('vendors');
+    const db = client.db('weddingdirectory');
+    const collection = db.collection('cached_results');
 
-    const vendors = places.map(place => ({
-      placeId: place.id,
-      name: place.name,
-      address: place.address,
-      phone: place.phone,
-      website: place.website,
-      rating: place.rating,
-      reviews: place.reviews,
-      location: place.location ? {
-        latitude: place.location.lat,
-        longitude: place.location.lng
-      } : undefined,
-      category: place.category.toLowerCase(),
-      city: place.city.toLowerCase(),
-      lastUpdated: new Date()
-    }));
+    const now = new Date();
+    const cacheData: CachedResult = {
+      category,
+      city,
+      places,
+      createdAt: now,
+      updatedAt: now,
+    };
 
-    console.log('Inserting new vendors into MongoDB:', vendors.length);
+    await collection.updateOne(
+      { category, city },
+      { $set: cacheData },
+      { upsert: true }
+    );
 
-    // Use upsert to update existing vendors or insert new ones
-    await Promise.all(vendors.map(vendor => 
-      collection.updateOne(
-        { placeId: vendor.placeId },
-        { $set: vendor },
-        { upsert: true }
-      )
-    ));
+    console.log('Cached results for:', category, city);
   } catch (error) {
     console.error('Error caching results:', error);
   }

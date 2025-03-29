@@ -1,74 +1,110 @@
 export interface City {
+  id: string;
   name: string;
   county: string;
+  population: number;
+  slug: string;
   latitude: number;
   longitude: number;
 }
 
 export const cities: City[] = [
   {
+    id: 'jacksonville',
     name: 'Jacksonville',
     county: 'Duval',
+    population: 949611,
+    slug: 'jacksonville',
     latitude: 30.3322,
     longitude: -81.6557
   },
   {
+    id: 'miami',
     name: 'Miami',
     county: 'Miami-Dade',
+    population: 442241,
+    slug: 'miami',
     latitude: 25.7617,
     longitude: -80.1918
   },
   {
+    id: 'tampa',
     name: 'Tampa',
     county: 'Hillsborough',
+    population: 384959,
+    slug: 'tampa',
     latitude: 27.9506,
     longitude: -82.4572
   },
   {
+    id: 'orlando',
     name: 'Orlando',
     county: 'Orange',
+    population: 307573,
+    slug: 'orlando',
     latitude: 28.5383,
     longitude: -81.3792
   },
   {
+    id: 'st-petersburg',
     name: 'St. Petersburg',
     county: 'Pinellas',
+    population: 258308,
+    slug: 'st-petersburg',
     latitude: 27.7676,
     longitude: -82.6403
   },
   {
+    id: 'hialeah',
     name: 'Hialeah',
     county: 'Miami-Dade',
+    population: 223109,
+    slug: 'hialeah',
     latitude: 25.8576,
     longitude: -80.2781
   },
   {
+    id: 'port-st-lucie',
     name: 'Port St. Lucie',
     county: 'St. Lucie',
+    population: 204851,
+    slug: 'port-st-lucie',
     latitude: 27.2939,
     longitude: -80.3503
   },
   {
+    id: 'cape-coral',
     name: 'Cape Coral',
     county: 'Lee',
+    population: 194016,
+    slug: 'cape-coral',
     latitude: 26.5629,
     longitude: -81.9495
   },
   {
+    id: 'tallahassee',
     name: 'Tallahassee',
     county: 'Leon',
+    population: 196169,
+    slug: 'tallahassee',
     latitude: 30.4383,
     longitude: -84.2807
   },
   {
+    id: 'fort-lauderdale',
     name: 'Fort Lauderdale',
     county: 'Broward',
+    population: 182760,
+    slug: 'fort-lauderdale',
     latitude: 26.1224,
     longitude: -80.1373
   },
   {
+    id: 'west-palm-beach',
     name: 'West Palm Beach',
     county: 'Palm Beach',
+    population: 117415,
+    slug: 'west-palm-beach',
     latitude: 26.7153,
     longitude: -80.0534
   },

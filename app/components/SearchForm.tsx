@@ -2,38 +2,10 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { categories } from '../data/categories';
+import { cities } from '../data/cities';
 
-interface SearchFormProps {
-  onSearch: (category: string, city: string) => void;
-}
-
-const categories = [
-  'Venues',
-  'Photographers',
-  'Catering',
-  'DJs',
-  'Florists',
-  'Wedding Planners',
-  'Bands',
-  'Bakers',
-  'Hair & Makeup',
-  'Transportation'
-];
-
-const cities = [
-  'Miami',
-  'Orlando',
-  'Tampa',
-  'Fort Lauderdale',
-  'Jacksonville',
-  'West Palm Beach',
-  'Naples',
-  'Sarasota',
-  'Cape Coral',
-  'Pensacola'
-];
-
-export default function SearchForm({ onSearch }: SearchFormProps) {
+export default function SearchForm() {
   const router = useRouter();
   const [category, setCategory] = useState('');
   const [city, setCity] = useState('');
@@ -41,13 +13,12 @@ export default function SearchForm({ onSearch }: SearchFormProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (category && city) {
-      onSearch(category, city);
-      router.push(`/search?category=${encodeURIComponent(category)}&city=${encodeURIComponent(city)}`);
+      router.push(`/search?category=${category}&city=${city}`);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md">
+    <form onSubmit={handleSubmit} className="w-full max-w-3xl mx-auto">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
@@ -57,13 +28,13 @@ export default function SearchForm({ onSearch }: SearchFormProps) {
             id="category"
             value={category}
             onChange={(e) => setCategory(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
             required
           >
             <option value="">Select a category</option>
             {categories.map((cat) => (
-              <option key={cat} value={cat}>
-                {cat}
+              <option key={cat.id} value={cat.slug}>
+                {cat.name}
               </option>
             ))}
           </select>
@@ -77,26 +48,27 @@ export default function SearchForm({ onSearch }: SearchFormProps) {
             id="city"
             value={city}
             onChange={(e) => setCity(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
             required
           >
             <option value="">Select a city</option>
             {cities.map((c) => (
-              <option key={c} value={c}>
-                {c}
+              <option key={c.id} value={c.slug}>
+                {c.name}, {c.county} County
               </option>
             ))}
           </select>
         </div>
       </div>
 
-      <button
-        type="submit"
-        className="mt-4 w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-        disabled={!category || !city}
-      >
-        Search Vendors
-      </button>
+      <div className="mt-4">
+        <button
+          type="submit"
+          className="w-full md:w-auto px-6 py-3 bg-purple-600 text-white font-medium rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors"
+        >
+          Search Vendors
+        </button>
+      </div>
     </form>
   );
 }

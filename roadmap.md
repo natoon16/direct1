@@ -1,104 +1,104 @@
 I have two CSVs, one is cities.csv:
-Population Rank  Place name               Label         County           Zip Codes
-1	               Jacksonville	            City	        Duval            32099-32234
-2	               Miami	                  City	        Miami-Dade       33101-33299 
-3	               Tampa	                  City	        Hillsborough     33559-33694 
-4	               Orlando	                City	        Orange	         2789-32899 
-5	               St. Petersburg	          City	        Pinellas	       33701-33784 
-6	               Hialeah	                City	        Miami-Dade       33002-33167
-7	               Port St. Lucie	          City	           St. Lucie	       34945-34990 
-8	               Tallahassee	            City	        Leon	           32301-32399
-9	               Cape Coral	              City	        Lee	             33903-33993 
-10	             Fort Lauderdale          City	        Broward	         33301-33394 
-11	             Pembroke Pines	          City	        Broward	         33023-33332 
-12	             Hollywood	              City	        Broward	         33004-33316 
-13	             Gainesville	            City	        Alachua	         32601-32667
-14	             Miramar	                City	        Broward	         32023-33029
-15	             Coral Springs	          City	        Broward	         33065-33076 
-16	             Palm Bay	                City	        Brevard	         32901-32976 
-17	             West Palm Beach	        City	        Palm Beach       33401-33422
-18	             Clearwater	              City	        Pinellas	       3755-34698
-19	             Lakeland	                City	        Polk	           33801-33815
-20	             Pompano Beach	          City	        Broward	         33060-33097
-21	             Miami Gardens	          City	        Miami-Dade       33014-33179
-22	             Davie	                  City	        Broward	         33312-33355
-23	             Boca Raton	              City	        Palm Beach       33427-33499
-24	             Sunrise	                City	        Broward	         33313-33351
-25	             Deltona	                City	        Volusia	         32725-32739
-26	             Plantation	              City	        Broward	         33311-33388
-27	             Palm Coast	              City	        Flagler	         32135-32164
-28	             Deerfield Beach	        City	        Broward          33064-33443
-29	             Fort Myers†	            City	        Lee	             33901-33994
-30	             Melbourne	              City	        Brevard	         32901-32951
-31	             Miami Beach	            City	        Miami-Dade       33109-33239
-32	             Largo	                  City	        Pinellas	       33770-33779
-33	             Homestead	              City	        Miami-Dade       33030–33092
-34	             Boynton Beach	          City	        Palm Beach       33424–32474
-35	             Kissimmee	              City	        Osceola	         34741–34759
-36	             Doral	                  City	        Miami-Dade       33122–33222
-37	             North Port	              City	        Sarasota	       34286–34291
-38	             Lauderhill	              City	        Broward	         33311–33351
-39	             Daytona Beach	          City	        Volusia  	       32114–32198
-40	             Tamarac	                City	        Broward	         33309–33359
-41	             Weston	                  City	        Broward	         33326–33332
-42	             Delray Beach	            City	        Palm Beach       33444-33484
-43	             Ocala	                  City	        Marion	         3423-32129
-45	             Wellington	              City	        Palm Beach       33411-33470
-46	             Sanford	                City	        Seminole         32746-32773
-47	             Jupiter	                City	        Palm Beach       33458-33478
-48	             North Miami	            City	        Miami-Dade       33160-33181
-49	             Palm Beach Gardens       City	        Palm Beach       33403-33420
-50	             St. Cloud	              City	        Osceola	         34744-34772
-51	             Margate	                City	        Broward	         33063-33093
-52	             Coconut Creek	          City	        Broward	         33063-33097
-53	             Bradenton	              City	        Manatee	         34201-34282
-54	             Apopka	                  City	        Orange	         32703-32776
-55	             Sarasota	                City	        Sarasota	       34230-34277
-56	             Pensacola	              City	        Escambia	       32501-32591
-57	             Bonita Springs	          City	        Lee	             33928-34136
-58	             Pinellas Park	          City	        Pinellas	       33702-33782
-59	             Coral Gables	            City	        Miami-Dade       33114-33158
-60	             Winter Haven	            City	        Polk	           33880-33888
-61	             Titusville	              City	        Brevard	         32780-32796
-62	             Fort Pierce	            City	        St. Lucie	       32703-34787
-63	             Ocoee	                  City	        Orange	         32703-34787
-64	             Winter Garden	          City	        Orange	         34761-34787
-65	             Altamonte Springs	      City	        Seminole	       32701-32779
-66	             Cutler Bay	              City	        Miami-Dade       33157-33190
-67	             North Lauderdale	        City	        Broward	         33068-33319
-68	             Oakland Park	            City	        Broward          33304-33334
-69	             Greenacres	              City	        Palm Beach       33413-33467
-70	             North Miami Beach        City	        Miami-Dade       33160-33181
-71	             Ormond Beach	            City	        Volusia          32173-32176
-72	             Clermont	                City	        Lake	           34711-34715
-73	             Lake Worth Beach	        City	        Palm Beach       33460-33480
-74	             Hallandale Beach	        City	        Broward	         33008-33009
-75	             Aventura	                City	        Miami-Dade       33160-33180
-76	             Oviedo	                  City	        Seminole	       32708-32766
-77	             Plant City	              City	        Hillsborough     33563-33567
-78	             Royal Palm Beach	        City	        Palm Beach       33411-33421
-79	             Winter Springs	          City	        Seminole	       32708-32765
-80	             Riviera Beach	          City	        Palm Beach       33403-33419
-81	             DeLand	                  City	        Volusia	         32720-32724
-82	             Estero	                  City	        Lee	             33928-34135
-83	             Dunedin	                City	        Pinellas	       33763-34698
-84	             Lauderdale Lakes	        City	        Broward	         33309-33319
-85	             Parkland	                City	        Broward	         33067-33076
-86               Cooper City	            City	        Broward	         33024-33330
-87               Panama City	            City	        Bay	             32401-32461
-88               Dania Beach	            City	        Broward	         33004-33316
-89	             Miami Lakes	            City	        Miami-Dade       33014-33018
-90	             New Smyrna Beach         City	        Volusia	         32168-32170
-91	             Winter Park	            City	        Orange	         32789-32793
-92	             Casselberry	            City	        Seminole	       32707-32730
-93	             Rockledge	              City	        Brevard	         32922-32956
-94	             Crestview	              City	        Okaloosa	       32536-32539
-95	             Leesburg	                City	        Lake	           34731-34797
-96	             Palm Springs	            City	        Palm Beach       33406-33461
-97	             Temple Terrace	          City	        Hillsborough     33617-33637
-98	             Haines City	            City	        Polk	           33837-33845
-99	             Key West	                City	        Monroe	         33040-33045
-100	             West Melbourne	          City	        Brevarid         32788-32789
+Population Rank  City                    County           
+1	               Jacksonville	  	        Duval
+2	               Miami	                  Miami-Dade 
+3	               Tampa	        	        Hillsborough 
+4	               Orlando	       	        Orange 
+5	               St. Petersburg	 	        Pinellas 
+6	               Hialeah	       	        Miami-Dade
+7	               Port St. Lucie	          St. Lucie	   
+8	               Tallahassee	   	        Leon
+9	               Cape Coral	     	        Lee 
+10	             Fort Lauderdale 	        Broward 
+11	             Pembroke Pines	 	        Broward 
+12	             Hollywood	     	        Broward 
+13	             Gainesville	   	        Alachua
+14	             Miramar	       	        Broward
+15	             Coral Springs  	        Broward 
+16	             Palm Bay	       	        Brevard 
+17	             West Palm Beach	        Palm Beach
+18	             Clearwater	     	        Pinellas
+19	             Lakeland	       	        Polk	 
+20	             Pompano Beach	 	        Broward
+21	             Miami Gardens	 	        Miami-Dade
+22	             Davie	         	        Broward
+23	             Boca Raton	     	        Palm Beach
+24	             Sunrise	       	        Broward
+25	             Deltona	       	        Volusia
+26	             Plantation	     	        Broward
+27	             Palm Coast	    	        Flagler
+28	             Deerfield Beach	        Broward
+29	             Fort Myers†	   	        Lee
+30	             Melbourne	     	        Brevard
+31	             Miami Beach	   	        Miami-Dade
+32	             Largo	         	        Pinellas
+33	             Homestead	     	        Miami-Dade
+34	             Boynton Beach	 	        Palm Beach
+35	             Kissimmee	     	        Osceola
+36	             Doral	         	        Miami-Dade
+37	             North Port	     	        Sarasota
+38	             Lauderhill	     	        Broward
+39	             Daytona Beach	 	        Volusia
+40	             Tamarac	       	        Broward
+41	             Weston	                  Broward
+42	             Delray Beach	   	        Palm Beach
+43	             Ocala	         	        Marion
+45	             Wellington	           	  Palm Beach
+46	             Sanford	       	        Seminole
+47	             Jupiter	                Palm Beach
+48	             North Miami	   	        Miami-Dade
+49	             Palm Beach Gardens       Palm Beach
+50	             St. Cloud	              Osceola
+51	             Margate	                Broward
+52	             Coconut Creek	          Broward
+53	             Bradenton	              Manatee
+54	             Apopka	                  Orange
+55	             Sarasota	                Sarasota
+56	             Pensacola	              Escambia
+57	             Bonita Springs	          Lee
+58	             Pinellas Park	          Pinellas
+59	             Coral Gables	   	        Miami-Dade
+60	             Winter Haven	            Polk
+61	             Titusville	              Brevard
+62	             Fort Pierce	            St. Lucie
+63	             Ocoee	                  Orange
+64	             Winter Garden	          Orange
+65	             Altamonte Springs	      Seminole
+66	             Cutler Bay	     	        Miami-Dade
+67	             North Lauderdale	        Broward
+68	             Oakland Park	  	        Broward
+69	             Greenacres	              Palm Beach
+70	             North Miami Beach 	      Miami-Dade
+71	             Ormond Beach	  	        Volusia
+72	             Clermont	                Lake	
+73	             Lake Worth Beach	        Palm Beach
+74	             Hallandale Beach	        Broward
+75	             Aventura	       	        Miami-Dade
+76	             Oviedo	                  Seminole
+77	             Plant City	     	        Hillsborough
+78	             Royal Palm Beach	        Palm Beach
+79	             Winter Springs	          Seminole
+80	             Riviera Beach	          Palm Beach
+81	             DeLand	                  Volusia
+82	             Estero	                  Lee
+83	             Dunedin	                Pinellas
+84	             Lauderdale Lakes	        Broward
+85	             Parkland	                Broward
+86               Cooper City	            Broward
+87               Panama City	            Bay	
+88               Dania Beach	            Broward
+89	             Miami Lakes	   	        Miami-Dade
+90	             New Smyrna Beach         Volusia
+91	             Winter Park	            Orange
+92	             Casselberry	            Seminole
+93	             Rockledge	              Brevard
+94	             Crestview	              Okaloosa
+95	             Leesburg	                Lake
+96	             Palm Springs	            Palm Beach
+97	             Temple Terrace	          Hillsborough
+98	             Haines City	            Polk
+99	             Key West	                Monroe
+100	             West Melbourne	          Brevarid
 
 The other one is keyword.csv
 Venues                                      

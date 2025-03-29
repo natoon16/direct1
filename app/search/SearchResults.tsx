@@ -11,7 +11,7 @@ import { searchVendors } from '../actions/search';
 export default function SearchResults() {
   const searchParams = useSearchParams();
   const [vendors, setVendors] = useState<Vendor[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -21,7 +21,6 @@ export default function SearchResults() {
         setError(null);
 
         if (!searchParams) {
-          setError('Search parameters not available');
           return;
         }
 
@@ -29,7 +28,6 @@ export default function SearchResults() {
         const city = searchParams.get('city');
 
         if (!category || !city) {
-          setError('Please select both category and city');
           return;
         }
 
@@ -74,6 +72,14 @@ export default function SearchResults() {
     return (
       <div className="text-center py-12">
         <p className="text-red-600">{error}</p>
+      </div>
+    );
+  }
+
+  if (!searchParams?.get('category') || !searchParams?.get('city')) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-gray-600">Please select a category and city to search for vendors.</p>
       </div>
     );
   }

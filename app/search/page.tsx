@@ -34,11 +34,18 @@ export async function generateMetadata({ searchParams }: SearchPageProps): Promi
   };
 }
 
+export const dynamic = 'force-dynamic';
+
 export default function SearchPage() {
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">Search Results</h1>
-      <SearchResults />
+    <div className="min-h-screen bg-gray-50">
+      <div className="container mx-auto px-4 py-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-4">Search Wedding Vendors</h1>
+          <SearchForm />
+        </div>
+        <SearchResults />
+      </div>
     </div>
   );
 } 

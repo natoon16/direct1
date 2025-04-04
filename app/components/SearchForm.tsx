@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { categories } from '../data/keywords';
+import { categories } from '../data/categories';
 import { cities } from '../data/cities';
-import { Category } from '../data/keywords';
+import { Category } from '../data/categories';
 
 export default function SearchForm() {
   const router = useRouter();
@@ -54,7 +54,7 @@ export default function SearchForm() {
             <option value="">Select a category</option>
             {categories.map((cat: Category) => (
               <option key={cat.slug} value={cat.slug}>
-                {cat.title}
+                {cat.name}
               </option>
             ))}
           </select>

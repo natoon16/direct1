@@ -48,7 +48,7 @@ export default function SearchPage({ searchParams }: SearchPageProps) {
           </h1>
           <SearchForm />
         </div>
-        <SearchResults category={category} city={city} />
+        <SearchResults />
       </div>
     </div>
   );

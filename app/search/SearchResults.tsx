@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { searchVendors } from '../actions/search';
 import { Vendor } from '../types/vendor';
-import { categories } from '../data/keywords';
+import { categories } from '../data/categories';
 import { cities } from '../data/cities';
 import VendorCard from '../components/VendorCard';
 
@@ -84,7 +84,7 @@ export default function SearchResults() {
   const category = searchParams.get('category');
   const city = searchParams.get('city');
 
-  const categoryName = categories.find(c => c.slug === category)?.title || category;
+  const categoryName = categories.find(c => c.slug === category)?.name || category;
   const cityName = cities.find(c => c.slug === city)?.name || city;
 
   if (loading) {

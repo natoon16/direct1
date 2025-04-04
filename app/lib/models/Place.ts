@@ -1,20 +1,30 @@
 import mongoose from 'mongoose';
 
 const placeSchema = new mongoose.Schema({
-  place_id: { type: String, required: true, unique: true },
+  id: { type: String, required: true, unique: true },
   name: { type: String, required: true },
   address: { type: String, required: true },
-  phone: String,
-  website: String,
-  rating: Number,
-  reviews: Number,
-  photos: [String],
+  phone: { type: String, default: '' },
+  website: { type: String, default: '' },
+  rating: { type: Number, default: 0 },
+  reviews: { type: Number, default: 0 },
   category: { type: String, required: true },
   city: { type: String, required: true },
-  state: { type: String, required: true },
-  country: { type: String, required: true },
-  lat: { type: Number, required: true },
-  lng: { type: Number, required: true },
+  businessStatus: { type: String, default: 'OPERATIONAL' },
+  openingHours: {
+    periods: [{
+      open: {
+        day: Number,
+        time: String
+      },
+      close: {
+        day: Number,
+        time: String
+      }
+    }]
+  },
+  priceLevel: Number,
+  types: [String],
   last_updated: { type: Date, default: Date.now },
 });
 

@@ -1,20 +1,39 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { categories } from '../data/categories';
 import { cities } from '../data/cities';
+import { Category } from '../data/categories';
 
 export default function SearchForm() {
   const router = useRouter();
   const [category, setCategory] = useState('');
-  const [city, setCity] = useState('');
+  const [cityInput, setCityInput] = useState('');
+  const [selectedCity, setSelectedCity] = useState('');
   const [isCityDropdownOpen, setIsCityDropdownOpen] = useState(false);
+
+  // Find matching city when user types
+  useEffect(() => {
+    if (cityInput) {
+      const matchingCity = cities.find(c => 
+        c.name.toLowerCase() === cityInput.toLowerCase() ||
+        c.slug.toLowerCase() === cityInput.toLowerCase()
+      );
+      if (matchingCity) {
+        setSelectedCity(matchingCity.slug);
+      } else {
+        setSelectedCity('');
+      }
+    } else {
+      setSelectedCity('');
+    }
+  }, [cityInput]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (category && city) {
-      router.push(`/search?category=${encodeURIComponent(category)}&city=${encodeURIComponent(city)}`);
+    if (category && selectedCity) {
+      router.push(`/search?category=${encodeURIComponent(category)}&city=${encodeURIComponent(selectedCity)}`);
     }
   };
 
@@ -33,7 +52,7 @@ export default function SearchForm() {
             required
           >
             <option value="">Select a category</option>
-            {categories.map((cat) => (
+            {categories.map((cat: Category) => (
               <option key={cat.slug} value={cat.slug}>
                 {cat.name}
               </option>
@@ -48,12 +67,16 @@ export default function SearchForm() {
             <input
               type="text"
               id="city"
-              value={city}
+              value={cityInput}
               onChange={(e) => {
-                setCity(e.target.value);
+                setCityInput(e.target.value);
                 setIsCityDropdownOpen(true);
               }}
               onFocus={() => setIsCityDropdownOpen(true)}
+              onBlur={() => {
+                // Delay closing dropdown to allow for click events
+                setTimeout(() => setIsCityDropdownOpen(false), 200);
+              }}
               placeholder="Search for a city"
               className="w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
               required
@@ -65,15 +88,16 @@ export default function SearchForm() {
               >
                 {cities
                   .filter(c => 
-                    c.name.toLowerCase().includes(city.toLowerCase()) ||
-                    c.county.toLowerCase().includes(city.toLowerCase())
+                    c.name.toLowerCase().includes(cityInput.toLowerCase()) ||
+                    c.county.toLowerCase().includes(cityInput.toLowerCase())
                   )
                   .map((c) => (
                     <div
                       key={c.slug}
                       className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
                       onClick={() => {
-                        setCity(c.slug);
+                        setCityInput(c.name);
+                        setSelectedCity(c.slug);
                         setIsCityDropdownOpen(false);
                       }}
                     >

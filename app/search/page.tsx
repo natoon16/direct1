@@ -4,12 +4,11 @@ import SearchResults from './SearchResults';
 import { categories } from '../data/categories';
 import { cities } from '../data/cities';
 
-type Props = {
-  params: { [key: string]: string | string[] };
+type SearchPageProps = {
   searchParams: { [key: string]: string | string[] | undefined };
 };
 
-export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
+export async function generateMetadata({ searchParams }: SearchPageProps): Promise<Metadata> {
   const category = categories.find(c => c.slug === searchParams.category as string);
   const city = cities.find(c => c.slug === searchParams.city as string);
 
@@ -34,7 +33,7 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
 
 export const dynamic = 'force-dynamic';
 
-export default function SearchPage({ searchParams }: Props) {
+export default function SearchPage({ searchParams }: SearchPageProps) {
   const category = searchParams.category as string;
   const city = searchParams.city as string;
 

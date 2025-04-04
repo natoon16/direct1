@@ -30,9 +30,18 @@ if (!MONGODB_URI) {
   throw new Error('MONGODB_URI is not defined');
 }
 
-// Use the clientPromise from mongodb.ts instead of creating a new connection
+// Create a singleton MongoDB client
+let mongoClient: MongoClient | null = null;
+
 async function getMongoClient() {
-  return clientPromise;
+  if (!mongoClient) {
+    if (!MONGODB_URI) {
+      throw new Error('MONGODB_URI is not defined');
+    }
+    mongoClient = new MongoClient(MONGODB_URI);
+    await mongoClient.connect();
+  }
+  return mongoClient;
 }
 
 interface PlaceSearchResponse {
@@ -60,25 +69,31 @@ export async function searchPlaces(category: string, city: string): Promise<Vend
     
     // Connect to MongoDB
     const clientMongo = await getMongoClient();
+    console.log('MongoDB client connected');
+    
     const db = clientMongo.db('weddingDirectory');
     const collection = db.collection<Vendor>('vendors');
+    console.log('Using collection: vendors');
 
     // Check cache first
-    const cachedResults = await collection.find({
-      category,
-      city: { $regex: new RegExp(city, 'i') }
-    }).toArray();
+    const query = { category, city: { $regex: new RegExp(city, 'i') } };
+    console.log('Cache query:', JSON.stringify(query));
+    
+    const cachedResults = await collection.find(query).toArray();
+    console.log(`Found ${cachedResults.length} cached results`);
 
     if (cachedResults.length > 0) {
-      console.log(`Found ${cachedResults.length} cached results`);
+      console.log(`Returning ${cachedResults.length} cached results`);
       return cachedResults;
     }
 
     // If not in cache, search Google Places API
-    const query = `${category} wedding vendors in ${city}, Florida`;
+    const searchQuery = `${category} wedding vendors in ${city}, Florida`;
     const searchUrl = `https://places.googleapis.com/v1/places:searchText`;
     
-    console.log(`Querying Google Places API: ${query}`);
+    console.log(`Querying Google Places API: ${searchQuery}`);
+    console.log(`API URL: ${searchUrl}`);
+    console.log(`API Key: ${GOOGLE_PLACES_API_KEY ? 'Present' : 'Missing'}`);
     
     const response = await fetch(searchUrl, {
       method: 'POST',
@@ -88,7 +103,7 @@ export async function searchPlaces(category: string, city: string): Promise<Vend
         'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.rating,places.userRatingCount,places.websiteUri,places.businessStatus,places.phoneNumbers'
       } as HeadersInit,
       body: JSON.stringify({
-        textQuery: query,
+        textQuery: searchQuery,
         locationBias: {
           circle: {
             center: {
@@ -102,6 +117,8 @@ export async function searchPlaces(category: string, city: string): Promise<Vend
       })
     });
 
+    console.log(`API Response status: ${response.status} ${response.statusText}`);
+    
     if (!response.ok) {
       const errorText = await response.text();
       console.error(`Google Places API error: ${response.status} ${response.statusText}`, errorText);
@@ -109,9 +126,11 @@ export async function searchPlaces(category: string, city: string): Promise<Vend
     }
 
     const data: PlaceSearchResponse = await response.json();
-    console.log(`Google Places API response:`, data);
+    console.log(`Google Places API response:`, JSON.stringify(data, null, 2));
 
     if (data.places && data.places.length > 0) {
+      console.log(`Found ${data.places.length} places from Google Places API`);
+      
       const vendors: Vendor[] = data.places.map(place => ({
         id: place.id,
         placeId: place.id,
@@ -141,6 +160,7 @@ export async function searchPlaces(category: string, city: string): Promise<Vend
           createdAt: new Date(),
           expiresAt: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000) // 180 days cache
         }));
+        console.log(`Caching ${vendors.length} vendors`);
         await collection.insertMany(vendorsWithDates);
         console.log(`Cached ${vendors.length} vendors`);
         return vendorsWithDates;

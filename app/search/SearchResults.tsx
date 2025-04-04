@@ -21,6 +21,7 @@ export default function SearchResults({ category, city }: SearchResultsProps) {
     async function fetchVendors() {
       try {
         if (!category || !city) {
+          setError('Please select both a category and a city to search for vendors.');
           return;
         }
 
@@ -31,22 +32,27 @@ export default function SearchResults({ category, city }: SearchResultsProps) {
         const cityName = cities.find(c => c.slug === city)?.name;
 
         if (!categoryName || !cityName) {
-          setError('Invalid category or city selected');
+          setError('Invalid category or city selected. Please try again.');
           return;
         }
 
         console.log('Searching for:', { category: categoryName, city: cityName });
         const result = await searchVendors(categoryName, cityName);
         
-        if (!result.success || !result.data) {
-          throw new Error(result.error);
+        if (!result.success) {
+          throw new Error(result.error || 'Failed to search vendors');
+        }
+
+        if (!result.data || result.data.length === 0) {
+          setError(`No ${categoryName.toLowerCase()} found in ${cityName}. Try a different category or city.`);
+          return;
         }
 
         console.log('Found places:', result.data.length);
         setVendors(result.data);
       } catch (err) {
         console.error('Error fetching vendors:', err);
-        setError('Failed to load vendors. Please try again.');
+        setError('Failed to load vendors. Please try again later.');
       } finally {
         setLoading(false);
       }
@@ -68,6 +74,11 @@ export default function SearchResults({ category, city }: SearchResultsProps) {
     return (
       <div className="text-center py-12">
         <p className="text-red-600">{error}</p>
+        <div className="mt-4">
+          <a href="/" className="text-purple-600 hover:text-purple-800">
+            Return to Home
+          </a>
+        </div>
       </div>
     );
   }
@@ -84,12 +95,22 @@ export default function SearchResults({ category, city }: SearchResultsProps) {
     return (
       <div className="text-center py-12">
         <p className="text-gray-600">No vendors found. Try different search criteria.</p>
+        <div className="mt-4">
+          <a href="/" className="text-purple-600 hover:text-purple-800">
+            Return to Home
+          </a>
+        </div>
       </div>
     );
   }
 
   return (
     <div>
+      <div className="mb-6">
+        <p className="text-gray-600">
+          Found {vendors.length} {categories.find(c => c.slug === category)?.name.toLowerCase()} in {cities.find(c => c.slug === city)?.name}.
+        </p>
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {vendors.map((vendor) => (
           <VendorCard key={vendor.id} vendor={vendor} />

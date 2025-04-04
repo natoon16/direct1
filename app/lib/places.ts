@@ -30,18 +30,9 @@ if (!MONGODB_URI) {
   throw new Error('MONGODB_URI is not defined');
 }
 
-// Create a singleton MongoDB client
-let mongoClient: MongoClient | null = null;
-
+// Use the clientPromise from mongodb.ts instead of creating a new connection
 async function getMongoClient() {
-  if (!mongoClient) {
-    if (!MONGODB_URI) {
-      throw new Error('MONGODB_URI is not defined');
-    }
-    mongoClient = new MongoClient(MONGODB_URI);
-    await mongoClient.connect();
-  }
-  return mongoClient;
+  return clientPromise;
 }
 
 interface PlaceSearchResponse {
@@ -65,9 +56,11 @@ export type { PlaceData };
 
 export async function searchPlaces(category: string, city: string): Promise<Vendor[]> {
   try {
+    console.log(`Searching for ${category} in ${city}`);
+    
     // Connect to MongoDB
     const clientMongo = await getMongoClient();
-    const db = clientMongo.db('weddingdirectory');
+    const db = clientMongo.db('weddingDirectory');
     const collection = db.collection<Vendor>('vendors');
 
     // Check cache first
@@ -77,12 +70,15 @@ export async function searchPlaces(category: string, city: string): Promise<Vend
     }).toArray();
 
     if (cachedResults.length > 0) {
+      console.log(`Found ${cachedResults.length} cached results`);
       return cachedResults;
     }
 
     // If not in cache, search Google Places API
     const query = `${category} wedding vendors in ${city}, Florida`;
     const searchUrl = `https://places.googleapis.com/v1/places:searchText`;
+    
+    console.log(`Querying Google Places API: ${query}`);
     
     const response = await fetch(searchUrl, {
       method: 'POST',
@@ -107,12 +103,15 @@ export async function searchPlaces(category: string, city: string): Promise<Vend
     });
 
     if (!response.ok) {
-      throw new Error(`Google Places API error: ${response.statusText}`);
+      const errorText = await response.text();
+      console.error(`Google Places API error: ${response.status} ${response.statusText}`, errorText);
+      throw new Error(`Google Places API error: ${response.status} ${response.statusText}`);
     }
 
     const data: PlaceSearchResponse = await response.json();
+    console.log(`Google Places API response:`, data);
 
-    if (data.places) {
+    if (data.places && data.places.length > 0) {
       const vendors: Vendor[] = data.places.map(place => ({
         id: place.id,
         placeId: place.id,
@@ -143,19 +142,19 @@ export async function searchPlaces(category: string, city: string): Promise<Vend
           expiresAt: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000) // 180 days cache
         }));
         await collection.insertMany(vendorsWithDates);
+        console.log(`Cached ${vendors.length} vendors`);
         return vendorsWithDates;
       }
-
-      return [];
+    } else {
+      console.log('No places found in Google Places API response');
     }
 
     return [];
   } catch (error) {
     console.error('Error searching places:', error);
     throw error;
-  } finally {
-    await mongoClient?.close();
   }
+  // Don't close the connection here, as it's managed by the clientPromise
 }
 
 export function convertPlaceToVendor(place: PlaceData | Vendor, category: string, city: string): Vendor {

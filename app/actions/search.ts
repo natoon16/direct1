@@ -1,8 +1,15 @@
 'use server';
 
 import { searchPlaces } from '../lib/places';
+import { Vendor } from '../types/vendor';
 
-export async function searchVendors(category: string, city: string) {
+interface SearchResponse {
+  success: boolean;
+  data?: Vendor[];
+  error?: string;
+}
+
+export async function searchVendors(category: string, city: string): Promise<SearchResponse> {
   try {
     console.log(`Server action: Searching for ${category} in ${city}`);
     

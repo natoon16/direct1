@@ -9,4 +9,8 @@ export interface PlaceData {
   businessStatus?: string;
   email?: string;
   placeId: string;
+  location?: {
+    lat: number;
+    lng: number;
+  };
 } 

@@ -1,123 +1,173 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { searchVendors } from '../actions/search';
 import { Vendor } from '../types/vendor';
-import VendorCard from '../components/VendorCard';
-import { categories } from '../data/categories';
+import { categories } from '../data/keywords';
 import { cities } from '../data/cities';
+import VendorCard from '../components/VendorCard';
 
-interface SearchResultsProps {
-  category: string;
-  city: string;
-}
-
-export default function SearchResults({ category, city }: SearchResultsProps) {
-  const router = useRouter();
+export default function SearchResults() {
+  const searchParams = useSearchParams();
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    async function fetchVendors() {
+    const fetchVendors = async () => {
+      if (!searchParams) {
+        setError('Search parameters not available');
+        setLoading(false);
+        return;
+      }
+
+      const category = searchParams.get('category');
+      const city = searchParams.get('city');
+
+      if (!category || !city) {
+        setError('Please select both a category and a city');
+        setLoading(false);
+        return;
+      }
+
       try {
-        setLoading(true);
-        setError(null);
-
-        if (!category || !city) {
-          console.log('Invalid search parameters:', { category, city });
-          setError('Please select both a category and a city');
-          setLoading(false);
-          return;
-        }
-
-        console.log('Fetching vendors for:', { category, city });
+        console.log('Searching for vendors with params:', { category, city });
         const result = await searchVendors(category, city);
-        console.log('Search result:', result);
+        console.log('Search results:', result);
 
-        if (!result.success) {
-          console.error('Search failed:', result.error);
-          setError(result.error || 'Failed to search vendors');
-          setLoading(false);
-          return;
-        }
-
-        if (!result.data || result.data.length === 0) {
-          console.log('No vendors found');
+        if ('error' in result && result.error) {
+          setError(result.error);
           setVendors([]);
-        } else {
-          console.log(`Found ${result.data.length} vendors`);
+        } else if ('data' in result && Array.isArray(result.data)) {
           setVendors(result.data);
+          setError(null);
+        } else {
+          setError('Invalid response from server');
+          setVendors([]);
         }
       } catch (err) {
         console.error('Error fetching vendors:', err);
         setError('An error occurred while searching for vendors');
+        setVendors([]);
       } finally {
         setLoading(false);
       }
-    }
+    };
 
     fetchVendors();
-  }, [category, city]);
+  }, [searchParams]);
 
-  const handleReturnHome = () => {
-    router.push('/');
-  };
+  if (!searchParams) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
+              Error
+            </h2>
+            <p className="mt-4 text-lg text-gray-600">Search parameters not available</p>
+            <div className="mt-6">
+              <a
+                href="/"
+                className="inline-flex items-center px-4 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700"
+              >
+                Return to Home
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const category = searchParams.get('category');
+  const city = searchParams.get('city');
+
+  const categoryName = categories.find(c => c.slug === category)?.title || category;
+  const cityName = cities.find(c => c.slug === city)?.name || city;
 
   if (loading) {
     return (
-      <div className="text-center py-12">
-        <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-purple-600 border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]" />
-        <p className="mt-4 text-gray-600">Searching for vendors...</p>
+      <div className="min-h-screen bg-gray-50 py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
+              Searching for {categoryName} in {cityName}...
+            </h2>
+            <div className="mt-4">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="text-center py-12">
-        <p className="text-red-600 mb-4">{error}</p>
-        <button 
-          onClick={handleReturnHome}
-          className="text-purple-600 hover:text-purple-800"
-        >
-          Return to Home
-        </button>
+      <div className="min-h-screen bg-gray-50 py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
+              Error
+            </h2>
+            <p className="mt-4 text-lg text-gray-600">{error}</p>
+            <div className="mt-6">
+              <a
+                href="/"
+                className="inline-flex items-center px-4 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700"
+              >
+                Return to Home
+              </a>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
 
   if (vendors.length === 0) {
     return (
-      <div className="text-center py-12">
-        <p className="text-gray-600">No vendors found. Try different search criteria.</p>
-        <div className="mt-4">
-          <button 
-            onClick={handleReturnHome}
-            className="text-purple-600 hover:text-purple-800"
-          >
-            Return to Home
-          </button>
+      <div className="min-h-screen bg-gray-50 py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
+              No {categoryName} found in {cityName}
+            </h2>
+            <p className="mt-4 text-lg text-gray-600">
+              Try searching in a different city or category
+            </p>
+            <div className="mt-6">
+              <a
+                href="/"
+                className="inline-flex items-center px-4 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700"
+              >
+                Return to Home
+              </a>
+            </div>
+          </div>
         </div>
       </div>
     );
   }
 
-  const categoryObj = categories.find(c => c.slug === category);
-  const cityObj = cities.find(c => c.slug === city);
-
   return (
-    <div>
-      <div className="mb-6">
-        <p className="text-gray-600">
-          Found {vendors.length} {categoryObj?.name.toLowerCase()} in {cityObj?.name}.
-        </p>
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {vendors.map((vendor) => (
-          <VendorCard key={vendor.id} vendor={vendor} />
-        ))}
+    <div className="min-h-screen bg-gray-50 py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center">
+          <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
+            {categoryName} in {cityName}
+          </h2>
+          <p className="mt-4 text-lg text-gray-600">
+            Found {vendors.length} vendors matching your search
+          </p>
+        </div>
+        <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+          {vendors.map((vendor) => (
+            <VendorCard key={vendor.id} vendor={vendor} />
+          ))}
+        </div>
       </div>
     </div>
   );

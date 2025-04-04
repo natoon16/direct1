@@ -34,14 +34,20 @@ if (!MONGODB_URI) {
 let mongoClient: MongoClient | null = null;
 
 async function getMongoClient() {
-  if (!mongoClient) {
-    if (!MONGODB_URI) {
-      throw new Error('MONGODB_URI is not defined');
+  try {
+    if (!mongoClient) {
+      if (!MONGODB_URI) {
+        throw new Error('MONGODB_URI is not defined');
+      }
+      mongoClient = new MongoClient(MONGODB_URI);
+      await mongoClient.connect();
+      console.log('MongoDB client connected successfully');
     }
-    mongoClient = new MongoClient(MONGODB_URI);
-    await mongoClient.connect();
+    return mongoClient;
+  } catch (error) {
+    console.error('Error connecting to MongoDB:', error);
+    throw error;
   }
-  return mongoClient;
 }
 
 interface PlaceSearchResponse {
@@ -155,15 +161,21 @@ export async function searchPlaces(category: string, city: string): Promise<Vend
 
       // Cache the results
       if (vendors.length > 0) {
-        const vendorsWithDates = vendors.map(vendor => ({
-          ...vendor,
-          createdAt: new Date(),
-          expiresAt: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000) // 180 days cache
-        }));
-        console.log(`Caching ${vendors.length} vendors`);
-        await collection.insertMany(vendorsWithDates);
-        console.log(`Cached ${vendors.length} vendors`);
-        return vendorsWithDates;
+        try {
+          const vendorsWithDates = vendors.map(vendor => ({
+            ...vendor,
+            createdAt: new Date(),
+            expiresAt: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000) // 180 days cache
+          }));
+          console.log(`Caching ${vendors.length} vendors`);
+          await collection.insertMany(vendorsWithDates);
+          console.log(`Cached ${vendors.length} vendors`);
+          return vendorsWithDates;
+        } catch (cacheError) {
+          console.error('Error caching vendors:', cacheError);
+          // Return the vendors even if caching fails
+          return vendors;
+        }
       }
     } else {
       console.log('No places found in Google Places API response');
@@ -174,7 +186,6 @@ export async function searchPlaces(category: string, city: string): Promise<Vend
     console.error('Error searching places:', error);
     throw error;
   }
-  // Don't close the connection here, as it's managed by the clientPromise
 }
 
 export function convertPlaceToVendor(place: PlaceData | Vendor, category: string, city: string): Vendor {

@@ -14,7 +14,25 @@ export async function searchVendors(category: string, city: string) {
       };
     }
 
-    const places = await searchPlaces(category, city);
+    // Validate category and city format
+    if (typeof category !== 'string' || typeof city !== 'string') {
+      console.error('Invalid parameter types:', { category, city });
+      return {
+        success: false,
+        error: 'Invalid search parameters'
+      };
+    }
+
+    // Trim whitespace and convert to lowercase
+    const trimmedCategory = category.trim().toLowerCase();
+    const trimmedCity = city.trim().toLowerCase();
+
+    console.log(`Server action: Processed parameters:`, {
+      category: trimmedCategory,
+      city: trimmedCity
+    });
+
+    const places = await searchPlaces(trimmedCategory, trimmedCity);
     
     console.log(`Server action: Found ${places.length} places`);
     

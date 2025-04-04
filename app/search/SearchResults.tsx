@@ -1,61 +1,58 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import VendorCard from '../components/VendorCard';
+import { useRouter } from 'next/navigation';
+import { searchVendors } from '../actions/search';
 import { Vendor } from '../types/vendor';
+import VendorCard from '../components/VendorCard';
 import { categories } from '../data/categories';
 import { cities } from '../data/cities';
-import { searchVendors } from '../actions/search';
-import { useRouter } from 'next/navigation';
 
-type SearchResultsProps = {
-  category?: string;
-  city?: string;
-};
+interface SearchResultsProps {
+  category: string;
+  city: string;
+}
 
 export default function SearchResults({ category, city }: SearchResultsProps) {
   const router = useRouter();
   const [vendors, setVendors] = useState<Vendor[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchVendors() {
       try {
-        if (!category || !city) {
-          setError('Please select both a category and a city to search for vendors.');
-          return;
-        }
-
         setLoading(true);
         setError(null);
 
-        const categoryObj = categories.find(c => c.slug === category);
-        const cityObj = cities.find(c => c.slug === city);
-
-        if (!categoryObj || !cityObj) {
-          console.error('Invalid category or city:', { category, city });
-          setError('Invalid category or city selected. Please try again.');
+        if (!category || !city) {
+          console.log('Invalid search parameters:', { category, city });
+          setError('Please select both a category and a city');
+          setLoading(false);
           return;
         }
 
-        console.log('Searching for:', { category: categoryObj.name, city: cityObj.name });
-        const result = await searchVendors(categoryObj.name, cityObj.name);
-        
+        console.log('Fetching vendors for:', { category, city });
+        const result = await searchVendors(category, city);
+        console.log('Search result:', result);
+
         if (!result.success) {
-          throw new Error(result.error || 'Failed to search vendors');
+          console.error('Search failed:', result.error);
+          setError(result.error || 'Failed to search vendors');
+          setLoading(false);
+          return;
         }
 
         if (!result.data || result.data.length === 0) {
-          setError(`No ${categoryObj.name.toLowerCase()} found in ${cityObj.name}. Try a different category or city.`);
-          return;
+          console.log('No vendors found');
+          setVendors([]);
+        } else {
+          console.log(`Found ${result.data.length} vendors`);
+          setVendors(result.data);
         }
-
-        console.log('Found places:', result.data.length);
-        setVendors(result.data);
       } catch (err) {
         console.error('Error fetching vendors:', err);
-        setError('Failed to load vendors. Please try again later.');
+        setError('An error occurred while searching for vendors');
       } finally {
         setLoading(false);
       }
@@ -71,8 +68,8 @@ export default function SearchResults({ category, city }: SearchResultsProps) {
   if (loading) {
     return (
       <div className="text-center py-12">
-        <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-purple-600 border-r-transparent"></div>
-        <p className="mt-4 text-gray-600">Loading vendors...</p>
+        <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-purple-600 border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]" />
+        <p className="mt-4 text-gray-600">Searching for vendors...</p>
       </div>
     );
   }
@@ -80,23 +77,13 @@ export default function SearchResults({ category, city }: SearchResultsProps) {
   if (error) {
     return (
       <div className="text-center py-12">
-        <p className="text-red-600">{error}</p>
-        <div className="mt-4">
-          <button 
-            onClick={handleReturnHome}
-            className="text-purple-600 hover:text-purple-800"
-          >
-            Return to Home
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  if (!category || !city) {
-    return (
-      <div className="text-center py-12">
-        <p className="text-gray-600">Please select a category and city to search for vendors.</p>
+        <p className="text-red-600 mb-4">{error}</p>
+        <button 
+          onClick={handleReturnHome}
+          className="text-purple-600 hover:text-purple-800"
+        >
+          Return to Home
+        </button>
       </div>
     );
   }

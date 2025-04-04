@@ -4,9 +4,9 @@ import SearchResults from './SearchResults';
 import { categories } from '../data/categories';
 import { cities } from '../data/cities';
 
-type SearchPageProps = {
+interface SearchPageProps {
   searchParams: { [key: string]: string | string[] | undefined };
-};
+}
 
 export async function generateMetadata({ searchParams }: SearchPageProps): Promise<Metadata> {
   const category = categories.find(c => c.slug === searchParams.category as string);

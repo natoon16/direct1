@@ -30,7 +30,19 @@ if (!MONGODB_URI) {
   throw new Error('MONGODB_URI is not defined');
 }
 
-const clientMongo = new MongoClient(MONGODB_URI);
+// Create a singleton MongoDB client
+let mongoClient: MongoClient | null = null;
+
+async function getMongoClient() {
+  if (!mongoClient) {
+    if (!MONGODB_URI) {
+      throw new Error('MONGODB_URI is not defined');
+    }
+    mongoClient = new MongoClient(MONGODB_URI);
+    await mongoClient.connect();
+  }
+  return mongoClient;
+}
 
 interface PlaceSearchResponse {
   places: Array<{
@@ -54,7 +66,7 @@ export type { PlaceData };
 export async function searchPlaces(category: string, city: string): Promise<Vendor[]> {
   try {
     // Connect to MongoDB
-    await clientMongo.connect();
+    const clientMongo = await getMongoClient();
     const db = clientMongo.db('weddingdirectory');
     const collection = db.collection<Vendor>('vendors');
 
@@ -142,7 +154,7 @@ export async function searchPlaces(category: string, city: string): Promise<Vend
     console.error('Error searching places:', error);
     throw error;
   } finally {
-    await clientMongo.close();
+    await mongoClient?.close();
   }
 }
 

@@ -1,5 +1,5 @@
 import { Place } from '../lib/places';
-import { StarIcon } from '@heroicons/react/20/solid';
+import { FaStar } from 'react-icons/fa';
 import Image from 'next/image';
 
 interface VendorCardProps {
@@ -33,7 +33,7 @@ export default function VendorCard({ vendor }: VendorCardProps) {
           <div className="mt-2 flex items-center">
             {vendor.rating && (
               <>
-                <StarIcon className="h-5 w-5 text-yellow-400" />
+                <FaStar className="h-5 w-5 text-yellow-400" />
                 <span className="ml-1 text-sm text-gray-600">
                   {vendor.rating.toFixed(1)}
                 </span>
